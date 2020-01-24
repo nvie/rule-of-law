@@ -1,0 +1,52 @@
+{
+  "name": "@simple-contacts/sanity-check",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "bin": {
+    "sanity-check": "dist/cli/sanity-check.js"
+  },
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "yarn run build:clean && yarn run build:parser && yarn run build:dist && yarn run build:flow",
+    "build:clean": "rimraf dist",
+    "build:parser": "pegjs --allowed-start-rules start --cache src/parser/sanelang.pegjs",
+    "build:flow": "flow-copy-source -v -i '**/__tests__/**' -i '**/*.spec.*' src dist",
+    "build:dist": "babel -d dist src --ignore '**/__tests__/**' --ignore '**/*.spec.*'",
+    "check": "yarn run check:eslint && yarn run check:prettier && yarn run check:import-sort",
+    "check:eslint": "eslint --report-unused-disable-directives src",
+    "check:import-sort": "import-sort --list-different 'src/**/*.js' '!src/parser/sanelang.js'",
+    "check:prettier": "prettier --list-different 'src/**/*.js' '!src/parser/sanelang.js'",
+    "test": "./test.sh && yarn run -s check && yarn run -s flow && jest src",
+    "flow": "flow --include-warnings",
+    "prepublish": "in-publish && yarn run actually-prepublish || not-in-publish",
+    "actually-prepublish": "yarn run build && yarn run test && yarn run build"
+  },
+  "homepage": "https://github.com/SimpleContacts/sanity-check",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SimpleContacts/sanity-check"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "pegjs",
+      "doc"
+    ]
+  },
+  "devDependencies": {
+    "flow-bin": "^0.116.1",
+    "flow-copy-source": "^2.0.9",
+    "in-publish": "^2.0.0",
+    "jest-cli": "^24.9.0",
+    "pegjs": "^0.10.0",
+    "rimraf": "^3.0.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.7.7",
+    "commander": "^4.0.1",
+    "invariant": "^2.2.4"
+  }
+}
