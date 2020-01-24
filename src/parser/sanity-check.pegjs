@@ -26,10 +26,10 @@ Predicate
 
 Quantifier
   = FORALL set:Identifier variable:Identifier COLON predicate:Predicate
-    { return ast.ForAllQuantifier(set, variable, predicate) }
+    { return ast.ForAll(set, variable, predicate) }
 
   / EXISTS set:Identifier variable:Identifier COLON predicate:Predicate
-    { return ast.ExistsQuantifier(set, variable, predicate) }
+    { return ast.Exists(set, variable, predicate) }
 
 
 Pred2

@@ -87,7 +87,7 @@ describe('predicates', () => {
 describe('quantifiers', () => {
   it('forall', () => {
     expect(parsePredicate('forall foos foo: foo')).toEqual(
-      ast.ForAllQuantifier(
+      ast.ForAll(
         ast.Identifier('foos'),
         ast.Identifier('foo'),
         ast.Identifier('foo'),
@@ -97,7 +97,7 @@ describe('quantifiers', () => {
 
   it('exists', () => {
     expect(parsePredicate('exists foos foo: foo')).toEqual(
-      ast.ExistsQuantifier(
+      ast.Exists(
         ast.Identifier('foos'),
         ast.Identifier('foo'),
         ast.Identifier('foo'),
@@ -107,10 +107,10 @@ describe('quantifiers', () => {
 
   it('multiple', () => {
     expect(parsePredicate('forall foos foo: exists bars bar: qux')).toEqual(
-      ast.ForAllQuantifier(
+      ast.ForAll(
         ast.Identifier('foos'),
         ast.Identifier('foo'),
-        ast.ExistsQuantifier(
+        ast.Exists(
           ast.Identifier('bars'),
           ast.Identifier('bar'),
           ast.Identifier('qux'),
@@ -186,7 +186,7 @@ describe('simple rule', () => {
     ).toEqual(
       ast.Rule(
         'description goes here',
-        ast.ForAllQuantifier(
+        ast.ForAll(
           ast.Identifier('Order'),
           ast.Identifier('o'),
           ast.Identifier('p'),

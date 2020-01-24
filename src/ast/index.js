@@ -7,8 +7,8 @@ export type DocumentNode = {|
   rules: Array<RuleNode>,
 |};
 
-export type ExistsQuantifierNode = {|
-  type: 'ExistsQuantifier',
+export type ExistsNode = {|
+  type: 'Exists',
   set: IdentifierNode,
   variable: IdentifierNode,
   predicate: PredicateNode,
@@ -55,10 +55,10 @@ export type PredicateNode =
 
 export type ExprNode = FieldSelectionNode | IdentifierNode;
 
-export type QuantifierNode = ForAllQuantifierNode | ExistsQuantifierNode;
+export type QuantifierNode = ForAllNode | ExistsNode;
 
-export type ForAllQuantifierNode = {|
-  type: 'ForAllQuantifier',
+export type ForAllNode = {|
+  type: 'ForAll',
   set: IdentifierNode,
   variable: IdentifierNode,
   predicate: PredicateNode,
@@ -92,23 +92,23 @@ const Identifier = (name: string): IdentifierNode => ({
   name,
 });
 
-const ExistsQuantifier = (
+const Exists = (
   set: IdentifierNode,
   variable: IdentifierNode,
   predicate: PredicateNode,
-): ExistsQuantifierNode => ({
-  type: 'ExistsQuantifier',
+): ExistsNode => ({
+  type: 'Exists',
   set,
   variable,
   predicate,
 });
 
-const ForAllQuantifier = (
+const ForAll = (
   set: IdentifierNode,
   variable: IdentifierNode,
   predicate: PredicateNode,
-): ForAllQuantifierNode => ({
-  type: 'ForAllQuantifier',
+): ForAllNode => ({
+  type: 'ForAll',
   set,
   variable,
   predicate,
@@ -165,9 +165,9 @@ export default {
   Comparison,
   Document,
   Equivalence,
-  ExistsQuantifier,
+  Exists,
   FieldSelection,
-  ForAllQuantifier,
+  ForAll,
   Identifier,
   Implication,
   NOT,
