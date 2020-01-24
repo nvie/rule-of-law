@@ -36,7 +36,14 @@ export type NotNode = {|
   predicate: PredicateNode,
 |};
 
-export type PredicateNode = QuantifierNode | IdentifierNode;
+export type PredicateNode =
+  | QuantifierNode
+  | AndNode
+  | OrNode
+  | NotNode
+  | ImplicationNode
+  | EquivalenceNode
+  | IdentifierNode;
 
 export type QuantifierNode = ForAllQuantifierNode | ExistsQuantifierNode;
 

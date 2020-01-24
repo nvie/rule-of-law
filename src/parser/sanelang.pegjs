@@ -3,7 +3,7 @@
 }
 
 
-start
+Document
   = rules:Rule*
     { return ast.Document(rules) }
 

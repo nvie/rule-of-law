@@ -1,13 +1,21 @@
-// @flow string
+// @flow strict
 
 import fs from 'fs';
-import parser from './sanelang';
-import type { DocumentNode } from '../ast';
+import parser from './sanelang'; // The PEGjs generated parser
+import type { DocumentNode, RuleNode, PredicateNode } from '../ast';
 
-export function parseString(input: string): DocumentNode {
-  return parser.parse(input);
+export function parseDocument(input: string): DocumentNode {
+  return parser.parse(input, { startRule: 'Document' });
 }
 
-export function parseFile(path: string) {
-  return parseString(fs.readFileSync(path, 'utf-8'));
+export function parseRule(input: string): RuleNode {
+  return parser.parse(input, { startRule: 'Rule' });
+}
+
+export function parsePredicate(input: string): PredicateNode {
+  return parser.parse(input, { startRule: 'Predicate' });
+}
+
+export function parseFile(path: string): DocumentNode {
+  return parseDocument(fs.readFileSync(path, 'utf-8'));
 }
