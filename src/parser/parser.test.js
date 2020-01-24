@@ -14,6 +14,15 @@ describe('empty document', () => {
 describe('predicates', () => {
   it('identifier', () => {
     expect(parsePredicate('x')).toEqual(ast.Identifier('x'));
+    expect(parsePredicate('foo')).toEqual(ast.Identifier('foo'));
+  });
+
+  xit('identifier (quoted)', () => {
+    expect(parsePredicate('`x`')).toEqual(ast.Identifier('x'));
+    expect(parsePredicate('`can contains spaces`')).toEqual(
+      ast.Identifier('can contain spaces'),
+    );
+    expect(parsePredicate('`x -> y`')).toEqual(ast.Identifier('x -> y'));
   });
 
   it('and', () => {
@@ -117,19 +126,66 @@ describe('comparison operators', () => {
       ast.Comparison('=', ast.Identifier('x'), ast.Identifier('y')),
     );
   });
+
+  it('!=', () => {
+    expect(parsePredicate('x != y')).toEqual(
+      ast.Comparison('!=', ast.Identifier('x'), ast.Identifier('y')),
+    );
+  });
+
+  it('<', () => {
+    expect(parsePredicate('x < y')).toEqual(
+      ast.Comparison('<', ast.Identifier('x'), ast.Identifier('y')),
+    );
+  });
+
+  it('>', () => {
+    expect(parsePredicate('x > y')).toEqual(
+      ast.Comparison('>', ast.Identifier('x'), ast.Identifier('y')),
+    );
+  });
+
+  it('>=', () => {
+    expect(parsePredicate('x >= y')).toEqual(
+      ast.Comparison('>=', ast.Identifier('x'), ast.Identifier('y')),
+    );
+  });
+
+  it('>=', () => {
+    expect(parsePredicate('x >= y')).toEqual(
+      ast.Comparison('>=', ast.Identifier('x'), ast.Identifier('y')),
+    );
+  });
+});
+
+describe('expressions', () => {
+  it('field selection', () => {
+    expect(parsePredicate('x.y')).toEqual(
+      ast.FieldSelection(ast.Identifier('x'), ast.Identifier('y')),
+    );
+  });
+
+  xit('field selection (nested)', () => {
+    expect(parsePredicate('x.y.z')).toEqual(
+      ast.FieldSelection(
+        ast.FieldSelection(ast.Identifier('x'), ast.Identifier('y')),
+        ast.Identifier('z'),
+      ),
+    );
+  });
 });
 
 describe('simple rule', () => {
   it('rule', () => {
     expect(
       parseRule(`
-        rule "Eric is cool"
+        rule "description goes here"
           forall Order o:
             p
       `),
     ).toEqual(
       ast.Rule(
-        'Eric is cool',
+        'description goes here',
         ast.ForAllQuantifier(
           ast.Identifier('Order'),
           ast.Identifier('o'),

@@ -14,6 +14,12 @@ export type ExistsQuantifierNode = {|
   predicate: PredicateNode,
 |};
 
+export type FieldSelectionNode = {|
+  type: 'FieldSelection',
+  expr: ExprNode,
+  field: IdentifierNode,
+|};
+
 export type ImplicationNode = {|
   type: 'Implication',
   left: PredicateNode,
@@ -47,7 +53,7 @@ export type PredicateNode =
   | EquivalenceNode
   | ExprNode;
 
-export type ExprNode = IdentifierNode; /* or more */
+export type ExprNode = FieldSelectionNode | IdentifierNode;
 
 export type QuantifierNode = ForAllQuantifierNode | ExistsQuantifierNode;
 
@@ -145,12 +151,22 @@ const Comparison = (
   right,
 });
 
+const FieldSelection = (
+  expr: ExprNode,
+  field: IdentifierNode,
+): FieldSelectionNode => ({
+  type: 'FieldSelection',
+  expr,
+  field,
+});
+
 export default {
   AND,
   Comparison,
   Document,
   Equivalence,
   ExistsQuantifier,
+  FieldSelection,
   ForAllQuantifier,
   Identifier,
   Implication,

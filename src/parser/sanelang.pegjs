@@ -82,9 +82,12 @@ Pred7
 
 
 Expr
+  = expr:Identifier DOT field:Identifier
+    { return ast.FieldSelection(expr, field) }
+
   // TODO: NULL literal
   // TODO: Constant value (aka 123, or "hi")
-  = Identifier
+  / Identifier
 
 
 StringLiteral
@@ -130,13 +133,14 @@ EOK "end of keyword"
 // Punctuation
 //
 COLON   = _ ':' _   { return ':' }
-LPAREN  = _ '(' _   { return '(' }
-RPAREN  = _ ')' _   { return ')' }
-IMPLIES = _ '=>' _  { return '=>' }
-EQUIV   = _ '<=>' _ { return '<=>' }
+DOT     = _ '.' _   { return '.' }
 EQ      = _ '=' _   { return '=' }
-NEQ     = _ '!=' _  { return '!=' }
-LTE     = _ '<=' _  { return '<=' }
-LT      = _ '<' _   { return '<' }
-GTE     = _ '>=' _  { return '>=' }
+EQUIV   = _ '<=>' _ { return '<=>' }
 GT      = _ '>' _   { return '>' }
+GTE     = _ '>=' _  { return '>=' }
+IMPLIES = _ '=>' _  { return '=>' }
+LPAREN  = _ '(' _   { return '(' }
+LT      = _ '<' _   { return '<' }
+LTE     = _ '<=' _  { return '<=' }
+NEQ     = _ '!=' _  { return '!=' }
+RPAREN  = _ ')' _   { return ')' }
