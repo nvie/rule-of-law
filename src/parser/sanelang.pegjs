@@ -72,13 +72,16 @@ Pred6
 
 
 Pred7
-  = LPAREN predicate:Predicate RPAREN
+  = LPAREN predicate:Pred2 RPAREN
     { return predicate }
 
-  / Literal
+  / left:Expr op:( EQ / NEQ / LTE / GTE / LT / GT ) right:Expr
+    { return ast.Comparison(op, left, right) }
+
+  / Expr
 
 
-Literal
+Expr
   // TODO: NULL literal
   // TODO: Constant value (aka 123, or "hi")
   = Identifier
@@ -131,3 +134,9 @@ LPAREN  = _ '(' _   { return '(' }
 RPAREN  = _ ')' _   { return ')' }
 IMPLIES = _ '=>' _  { return '=>' }
 EQUIV   = _ '<=>' _ { return '<=>' }
+EQ      = _ '=' _   { return '=' }
+NEQ     = _ '!=' _  { return '!=' }
+LTE     = _ '<=' _  { return '<=' }
+LT      = _ '<' _   { return '<' }
+GTE     = _ '>=' _  { return '>=' }
+GT      = _ '>' _   { return '>' }

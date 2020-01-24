@@ -1,5 +1,7 @@
 // @flow strict
 
+export type ComparisonOperator = '=' | '!=' | '<' | '>' | '<=' | '>=';
+
 export type DocumentNode = {|
   type: 'Document',
   rules: Array<RuleNode>,
@@ -43,7 +45,9 @@ export type PredicateNode =
   | NotNode
   | ImplicationNode
   | EquivalenceNode
-  | IdentifierNode;
+  | ExprNode;
+
+export type ExprNode = IdentifierNode; /* or more */
 
 export type QuantifierNode = ForAllQuantifierNode | ExistsQuantifierNode;
 
@@ -60,6 +64,13 @@ export type RuleNode = {|
   type: 'Rule',
   name: string,
   quantifier: QuantifierNode,
+|};
+
+export type ComparisonNode = {|
+  type: 'Comparison',
+  op: ComparisonOperator,
+  left: ExprNode,
+  right: ExprNode,
 |};
 
 export type StringLiteralNode = {| type: 'StringLiteral', value: string |};
@@ -123,8 +134,21 @@ const Document = (rules: Array<RuleNode>): DocumentNode => ({
   rules,
 });
 
+const Comparison = (
+  op: ComparisonOperator,
+  left: ExprNode,
+  right: ExprNode,
+): ComparisonNode => ({
+  type: 'Comparison',
+  op,
+  left,
+  right,
+});
+
 export default {
   AND,
+  Comparison,
+  Document,
   Equivalence,
   ExistsQuantifier,
   ForAllQuantifier,
@@ -134,5 +158,4 @@ export default {
   OR,
   Rule,
   StringLiteral,
-  Document,
 };

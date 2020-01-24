@@ -11,27 +11,6 @@ describe('empty document', () => {
   });
 });
 
-describe('simple rule', () => {
-  it('rule', () => {
-    expect(
-      parseRule(`
-        rule "Eric is cool"
-          forall Order o:
-            p
-      `),
-    ).toEqual(
-      ast.Rule(
-        'Eric is cool',
-        ast.ForAllQuantifier(
-          ast.Identifier('Order'),
-          ast.Identifier('o'),
-          ast.Identifier('p'),
-        ),
-      ),
-    );
-  });
-});
-
 describe('predicates', () => {
   it('identifier', () => {
     expect(parsePredicate('x')).toEqual(ast.Identifier('x'));
@@ -91,6 +70,71 @@ describe('predicates', () => {
           ast.AND([ast.Identifier('p'), ast.Identifier('q')]),
           ast.AND([ast.NOT(ast.Identifier('r')), ast.Identifier('s')]),
         ]),
+      ),
+    );
+  });
+});
+
+describe('quantifiers', () => {
+  it('forall', () => {
+    expect(parsePredicate('forall foos foo: foo')).toEqual(
+      ast.ForAllQuantifier(
+        ast.Identifier('foos'),
+        ast.Identifier('foo'),
+        ast.Identifier('foo'),
+      ),
+    );
+  });
+
+  it('exists', () => {
+    expect(parsePredicate('exists foos foo: foo')).toEqual(
+      ast.ExistsQuantifier(
+        ast.Identifier('foos'),
+        ast.Identifier('foo'),
+        ast.Identifier('foo'),
+      ),
+    );
+  });
+
+  it('multiple', () => {
+    expect(parsePredicate('forall foos foo: exists bars bar: qux')).toEqual(
+      ast.ForAllQuantifier(
+        ast.Identifier('foos'),
+        ast.Identifier('foo'),
+        ast.ExistsQuantifier(
+          ast.Identifier('bars'),
+          ast.Identifier('bar'),
+          ast.Identifier('qux'),
+        ),
+      ),
+    );
+  });
+});
+
+describe('comparison operators', () => {
+  it('=', () => {
+    expect(parsePredicate('x = y')).toEqual(
+      ast.Comparison('=', ast.Identifier('x'), ast.Identifier('y')),
+    );
+  });
+});
+
+describe('simple rule', () => {
+  it('rule', () => {
+    expect(
+      parseRule(`
+        rule "Eric is cool"
+          forall Order o:
+            p
+      `),
+    ).toEqual(
+      ast.Rule(
+        'Eric is cool',
+        ast.ForAllQuantifier(
+          ast.Identifier('Order'),
+          ast.Identifier('o'),
+          ast.Identifier('p'),
+        ),
       ),
     );
   });
