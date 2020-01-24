@@ -1,5 +1,15 @@
 {
   const ast = require('../ast').default;
+
+  function unescape(s) {
+      return s
+          .replace(/\\n/g, '\n')
+          .replace(/\\t/g, '\t')
+          .replace(/\\r/g, '\r')
+          .replace(/\\'/g, "'")
+          .replace(/\\"/g, '"')
+          .replace(/\\\\/g, '\\')
+  }
 }
 
 
@@ -82,12 +92,42 @@ Pred7
 
 
 Expr
-  = expr:Identifier DOT field:Identifier
-    { return ast.FieldSelection(expr, field) }
+  = leading:( Identifier ( DOT / ARROW ) )+ field:Identifier
+    {
+       function leftAssoc(exprs, rhs) {
+         if (exprs.length === 0) {
+           return rhs;
+         } else {
+           const [expr, op] = exprs.pop()
+           const lhs = leftAssoc(exprs, expr);
+           if (op === '.') {
+             return ast.FieldSelection(lhs, rhs);
+           } else if (op === '->') {
+             return ast.RelationSelection(lhs, rhs);
+           } else {
+             throw new Error('Unknown operation: ' + op);
+           }
+         }
+       }
 
-  // TODO: NULL literal
-  // TODO: Constant value (aka 123, or "hi")
+       return leftAssoc(leading, field);
+    }
+
+  / Literal
+
   / Identifier
+
+
+Literal
+  = NULL
+    { return ast.NullLiteral() }
+  / NumberLiteral
+  / StringLiteral
+
+
+NumberLiteral
+  = value:$( [-]?[0-9]+([.][0-9]*)? ) _
+    { return ast.NumberLiteral(parseFloat(value)) }
 
 
 StringLiteral
@@ -123,6 +163,7 @@ EXISTS = _ 'exists'  EOK
 OR     = _ 'or'      EOK
 AND    = _ 'and'     EOK
 NOT    = _ 'not'     EOK
+NULL   = _ 'null'i   EOK
 
 
 EOK "end of keyword"
@@ -132,6 +173,7 @@ EOK "end of keyword"
 //
 // Punctuation
 //
+ARROW   = _ '->' _  { return '->' }
 COLON   = _ ':' _   { return ':' }
 DOT     = _ '.' _   { return '.' }
 EQ      = _ '=' _   { return '=' }

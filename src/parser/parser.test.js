@@ -159,17 +159,80 @@ describe('comparison operators', () => {
 });
 
 describe('expressions', () => {
+  it('null literal', () => {
+    expect(parsePredicate('null')).toEqual(ast.NullLiteral());
+    expect(parsePredicate('NULL')).toEqual(ast.NullLiteral());
+  });
+
+  it('number literals', () => {
+    expect(parsePredicate('0')).toEqual(ast.NumberLiteral(0));
+    expect(parsePredicate('1')).toEqual(ast.NumberLiteral(1));
+    expect(parsePredicate('232132693127')).toEqual(
+      ast.NumberLiteral(232132693127),
+    );
+    expect(parsePredicate('3.141592')).toEqual(ast.NumberLiteral(3.141592));
+    expect(parsePredicate('0.0001')).toEqual(ast.NumberLiteral(0.0001));
+    expect(parsePredicate('-0.0001')).toEqual(ast.NumberLiteral(-0.0001));
+    expect(parsePredicate('-3.141592')).toEqual(ast.NumberLiteral(-3.141592));
+  });
+
+  it('string literals', () => {
+    expect(parsePredicate('"hello"')).toEqual(ast.StringLiteral('hello'));
+    expect(parsePredicate('"strings are double-quoted"')).toEqual(
+      ast.StringLiteral('strings are double-quoted'),
+    );
+    expect(parsePredicate('"escaping \\"with quotes\\""')).toEqual(
+      ast.StringLiteral('escaping "with quotes"'),
+    );
+  });
+
   it('field selection', () => {
     expect(parsePredicate('x.y')).toEqual(
       ast.FieldSelection(ast.Identifier('x'), ast.Identifier('y')),
     );
   });
 
-  xit('field selection (nested)', () => {
-    expect(parsePredicate('x.y.z')).toEqual(
+  it('field selection (nested)', () => {
+    expect(parsePredicate('p.q.r.s')).toEqual(
       ast.FieldSelection(
-        ast.FieldSelection(ast.Identifier('x'), ast.Identifier('y')),
-        ast.Identifier('z'),
+        ast.FieldSelection(
+          ast.FieldSelection(ast.Identifier('p'), ast.Identifier('q')),
+          ast.Identifier('r'),
+        ),
+        ast.Identifier('s'),
+      ),
+    );
+  });
+
+  it('relation following', () => {
+    expect(parsePredicate('x->y')).toEqual(
+      ast.RelationSelection(ast.Identifier('x'), ast.Identifier('y')),
+    );
+  });
+
+  it('relation following (nested)', () => {
+    expect(parsePredicate('p->q->r->s')).toEqual(
+      ast.RelationSelection(
+        ast.RelationSelection(
+          ast.RelationSelection(ast.Identifier('p'), ast.Identifier('q')),
+          ast.Identifier('r'),
+        ),
+        ast.Identifier('s'),
+      ),
+    );
+  });
+
+  it('equal precedence', () => {
+    expect(parsePredicate('p->q.r->s.t')).toEqual(
+      ast.FieldSelection(
+        ast.RelationSelection(
+          ast.FieldSelection(
+            ast.RelationSelection(ast.Identifier('p'), ast.Identifier('q')),
+            ast.Identifier('r'),
+          ),
+          ast.Identifier('s'),
+        ),
+        ast.Identifier('t'),
       ),
     );
   });

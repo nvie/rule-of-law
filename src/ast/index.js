@@ -7,6 +7,20 @@ export type DocumentNode = {|
   rules: Array<RuleNode>,
 |};
 
+export type NullLiteralNode = {|
+  type: 'NullLiteral',
+|};
+
+export type NumberLiteralNode = {|
+  type: 'NumberLiteral',
+  value: number,
+|};
+
+export type StringLiteralNode = {|
+  type: 'StringLiteral',
+  value: string,
+|};
+
 export type ExistsNode = {|
   type: 'Exists',
   set: IdentifierNode,
@@ -16,6 +30,12 @@ export type ExistsNode = {|
 
 export type FieldSelectionNode = {|
   type: 'FieldSelection',
+  expr: ExprNode,
+  field: IdentifierNode,
+|};
+
+export type RelationSelectionNode = {|
+  type: 'RelationSelection',
   expr: ExprNode,
   field: IdentifierNode,
 |};
@@ -53,7 +73,16 @@ export type PredicateNode =
   | EquivalenceNode
   | ExprNode;
 
-export type ExprNode = FieldSelectionNode | IdentifierNode;
+export type ExprNode =
+  | FieldSelectionNode
+  | RelationSelectionNode
+  | LiteralNode
+  | IdentifierNode;
+
+export type LiteralNode =
+  | NullLiteralNode
+  | NumberLiteralNode
+  | StringLiteralNode;
 
 export type QuantifierNode = ForAllNode | ExistsNode;
 
@@ -78,8 +107,6 @@ export type ComparisonNode = {|
   left: ExprNode,
   right: ExprNode,
 |};
-
-export type StringLiteralNode = {| type: 'StringLiteral', value: string |};
 
 const Rule = (name: string, quantifier: QuantifierNode): RuleNode => ({
   type: 'Rule',
@@ -114,11 +141,6 @@ const ForAll = (
   predicate,
 });
 
-const StringLiteral = (value: string): StringLiteralNode => ({
-  type: 'StringLiteral',
-  value,
-});
-
 const Implication = (
   left: PredicateNode,
   right: PredicateNode,
@@ -151,11 +173,32 @@ const Comparison = (
   right,
 });
 
+const NullLiteral = (): NullLiteralNode => ({ type: 'NullLiteral' });
+
+const NumberLiteral = (value: number): NumberLiteralNode => ({
+  type: 'NumberLiteral',
+  value,
+});
+
+const StringLiteral = (value: string): StringLiteralNode => ({
+  type: 'StringLiteral',
+  value,
+});
+
 const FieldSelection = (
   expr: ExprNode,
   field: IdentifierNode,
 ): FieldSelectionNode => ({
   type: 'FieldSelection',
+  expr,
+  field,
+});
+
+const RelationSelection = (
+  expr: ExprNode,
+  field: IdentifierNode,
+): RelationSelectionNode => ({
+  type: 'RelationSelection',
   expr,
   field,
 });
@@ -167,10 +210,13 @@ export default {
   Equivalence,
   Exists,
   FieldSelection,
+  RelationSelection,
   ForAll,
   Identifier,
   Implication,
   NOT,
+  NullLiteral,
+  NumberLiteral,
   OR,
   Rule,
   StringLiteral,
