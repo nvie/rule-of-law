@@ -7,9 +7,10 @@ type Options = {|
   verbose: boolean,
 |};
 
-function runWithOptions(options: Options) {
-  const input = parser.parseFile('./test.rules');
-  console.log(JSON.stringify(input, null, 2));
+function runWithOptions(options: Options, args: Array<string>) {
+  const [inputFile] = args;
+  const ast = parser.parseFile(inputFile);
+  console.log(JSON.stringify(ast, null, 2));
 }
 
 async function main() {
@@ -28,7 +29,7 @@ async function main() {
     // $FlowFixMe - options monkey-patched on program are invisible to Flow
     const { verbose } = program;
     const options = { verbose };
-    runWithOptions(options);
+    runWithOptions(options, program.args);
   }
 }
 
