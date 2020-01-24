@@ -2,9 +2,9 @@
 
 import fs from 'fs';
 import parser from './sanelang';
-import type { Node } from '../ast';
+import type { DocumentNode } from '../ast';
 
-export function parseString(input: string): Node {
+export function parseString(input: string): DocumentNode {
   return parser.parse(input);
 }
 

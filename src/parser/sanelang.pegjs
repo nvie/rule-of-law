@@ -4,6 +4,11 @@
 
 
 start
+  = rules:Rule*
+    { return ast.Document(rules) }
+
+
+Rule
   = RULE name:StringLiteral quantifier:Quantifier
     { return ast.Rule(name.value, quantifier) }
 

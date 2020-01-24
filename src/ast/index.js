@@ -1,5 +1,10 @@
 // @flow strict
 
+export type DocumentNode = {|
+  type: 'Document',
+  rules: Array<RuleNode>,
+|};
+
 export type ExistsQuantifierNode = {|
   type: 'ExistsQuantifier',
   set: IdentifierNode,
@@ -106,6 +111,11 @@ const AND = (args: Array<PredicateNode>): AndNode => ({ type: 'AND', args });
 
 const OR = (args: Array<PredicateNode>): OrNode => ({ type: 'OR', args });
 
+const Document = (rules: Array<RuleNode>): DocumentNode => ({
+  type: 'Document',
+  rules,
+});
+
 export default {
   AND,
   Equivalence,
@@ -117,4 +127,5 @@ export default {
   OR,
   Rule,
   StringLiteral,
+  Document,
 };
