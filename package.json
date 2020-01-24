@@ -42,6 +42,7 @@
     "in-publish": "^2.0.0",
     "jest-cli": "^25.1.0",
     "pegjs": "^0.10.0",
+    "prettier": "^1.19.1",
     "rimraf": "^3.0.0"
   },
   "dependencies": {
