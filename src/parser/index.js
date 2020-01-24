@@ -1,7 +1,7 @@
 // @flow strict
 
 import fs from 'fs';
-import parser from './sanelang'; // The PEGjs generated parser
+import parser from './generated-parser';
 import type { DocumentNode, RuleNode, PredicateNode } from '../ast';
 
 export function parseDocument(input: string): DocumentNode {

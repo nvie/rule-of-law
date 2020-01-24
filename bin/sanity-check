@@ -1,0 +1,36 @@
+#!/bin/sh
+set -eu
+
+PROJ_ROOT=$(git rev-parse --show-toplevel)
+
+#
+# This is a helper script that will recompile the compiler (if necessary) and
+# then immediately run it.
+#
+rebuild_if_needed () {
+
+    # To determine if a rebuild is needed:
+    # 1. `dist/cli/sanity-check.js` (output file) does not exist yet
+    # 2. Scan the `src/` folder for changes
+
+    if [ -f dist/cli/sanity-check.js ]; then
+        if [ "$(find bin src -newer dist/cli/sanity-check.js -type f -print -quit | wc -l)" -eq 0 ]; then
+            # No recompilation necessary
+            return
+        fi
+    fi
+
+    echo "Recompiling..." >&2
+
+    # yarn run build:parser
+    pegjs --cache --allowed-start-rules Document,Rule,Predicate -o src/parser/generated-parser.js src/parser/sanity-check.pegjs
+    babel -d dist src --ignore '**/__tests__/**' --ignore '**/*.spec.*'
+}
+
+
+main () {
+    ( cd "$PROJ_ROOT" && rebuild_if_needed )
+    exec node "$PROJ_ROOT/dist/cli/sanity-check.js" "$@"
+}
+
+main "$@"

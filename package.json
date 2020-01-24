@@ -12,7 +12,7 @@
   "scripts": {
     "build": "yarn run build:clean && yarn run build:parser && yarn run build:dist && yarn run build:flow",
     "build:clean": "rimraf dist",
-    "build:parser": "pegjs --allowed-start-rules Document,Rule,Predicate --cache src/parser/sanelang.pegjs",
+    "build:parser": "pegjs --allowed-start-rules Document,Rule,Predicate --cache -o src/parser/generated-parser.js src/parser/sanity-check.pegjs",
     "build:flow": "flow-copy-source -v -i '**/__tests__/**' -i '**/*.spec.*' src dist",
     "build:dist": "babel -d dist src --ignore '**/__tests__/**' --ignore '**/*.spec.*'",
     "check": "yarn run check:eslint && yarn run check:prettier && yarn run check:import-sort",

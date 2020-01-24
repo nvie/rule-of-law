@@ -3,5 +3,4 @@
 node_modules/
 dist/
 
-# The generated parser
-src/parser/sanelang.js
+generated-parser.js
