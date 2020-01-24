@@ -1,13 +1,13 @@
 // @flow strict
 
-type Node = StringLiteralNode
+export type Node = StringLiteralNode;
 
-type StringLiteralNode = {|
+export type StringLiteralNode = {|
   type: 'StringLiteral',
   value: string,
-|}
+|};
 
 export const StringLiteral = (value: string): StringLiteralNode => ({
   type: 'StringLiteral',
   value,
-})
+});

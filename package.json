@@ -37,6 +37,8 @@
     ]
   },
   "devDependencies": {
+    "@babel/cli": "^7.8.3",
+    "@babel/preset-flow": "^7.8.3",
     "flow-bin": "^0.116.1",
     "flow-copy-source": "^2.0.9",
     "in-publish": "^2.0.0",
