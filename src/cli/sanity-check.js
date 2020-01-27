@@ -2,6 +2,7 @@
 
 const commander = require('commander');
 const parser = require('../parser');
+const check = require('../checker').default;
 
 type Options = {|
   verbose: boolean,
@@ -10,7 +11,8 @@ type Options = {|
 function runWithOptions(options: Options, args: Array<string>) {
   const [inputFile] = args;
   const ast = parser.parseFile(inputFile);
-  console.log(JSON.stringify(ast, null, 2));
+  const typedAst = check(ast);
+  console.log(JSON.stringify(typedAst, null, 2));
 }
 
 async function main() {
