@@ -2,41 +2,27 @@
 
 import fs from 'fs';
 import type { Node, IdentifierNode } from '../ast';
+import type { TypeInfo } from '../types';
+import t from '../types';
 import invariant from 'invariant';
-
-type TypeInfo =
-  | {| type: 'String', alias?: string |}
-  | {| type: 'Int', alias?: string |}
-  | {| type: 'Bool', alias?: string |}
-  | {| type: 'Null', alias?: string |}
-  | {| type: 'TODO', alias?: string |}
-  | {|
-      type: 'Record',
-      alias?: string,
-      record: { [string]: TypeInfo }, // e.g. Order, Prescription, etc.
-    |};
-
-const Int = (): TypeInfo => ({ type: 'Int' });
-const String = (): TypeInfo => ({ type: 'String' });
-const Bool = (): TypeInfo => ({ type: 'Bool' });
-const Null = (): TypeInfo => ({ type: 'Null' });
-const TODO = (): TypeInfo => ({ type: 'TODO' });
-const Record = (alias: string, record: { [string]: TypeInfo }): TypeInfo => ({
-  type: 'Record',
-  alias,
-  record,
-});
 
 // Some hacks to fake that we already have an external oracle for telling us
 // named types
 // TODO: Obviously replace this with the real thing later
-const OrderType = () =>
-  Record('Order', {
-    id: Int(),
-    orderNo: String(),
-    status: String(),
-    isEnabled: Bool(),
-  });
+const FakeRecordType = (alias: string) =>
+  t.Record(
+    {
+      id: t.Int(),
+      str: t.String(),
+      maybeStr: t.Nullable(t.String()),
+      maybeInt: t.Nullable(t.Int()),
+      maybeBool: t.Nullable(t.Bool()),
+      orderNo: t.String(),
+      status: t.String(),
+      isEnabled: t.Bool(),
+    },
+    alias,
+  );
 
 type Scope = {|
   // All variables defined in this scope
@@ -88,36 +74,73 @@ class Stack {
   }
 }
 
+function isPrimitive(type: TypeInfo): boolean %checks {
+  return (
+    type.type === 'Int' ||
+    type.type === 'String' ||
+    type.type === 'Bool' ||
+    type.type === 'Null'
+  );
+}
+
+function isCompatible(type1: TypeInfo, type2: TypeInfo): boolean {
+  if (isPrimitive(type1) && isPrimitive(type2)) {
+    return type1.type === type2.type;
+  }
+
+  if (type1.type === 'Nullable') {
+    return isCompatible(type1.ofType, type2);
+  } else if (type2.type === 'Nullable') {
+    return isCompatible(type1, type2.ofType);
+  }
+
+  return false;
+}
+
 function check(node: Node, stack: Stack): [Node, TypeInfo] {
   switch (node.kind) {
-    case 'Document':
+    case 'Document': {
       node.rules.map(node => check(node, stack));
-      return node;
+      return [node, t.Empty()];
+    }
 
-    case 'Rule':
-      // TODO: Check that node.quantifier is boolean!
-      return check(node.quantifier, stack);
+    case 'Rule': {
+      const [, pred_t] = check(node.predicate, stack);
+      invariant(pred_t.type === 'Bool', 'Expected a bool predicate');
+      return [node, t.Bool()];
+    }
 
     case 'ForAll':
-    case 'Exists':
+    case 'Exists': {
       stack.push();
 
-      const fakeType = OrderType(); // TODO: Replace with a dynamic value
+      const fakeType = FakeRecordType(node.set.name); // TODO: Replace with a dynamic value
       stack.setType(node.variable.name, fakeType);
 
-      // TODO: Check that node.predicate is boolean!
-      const result = check(node.predicate, stack);
+      const [, pred_t] = check(node.predicate, stack);
+      invariant(
+        pred_t.type === 'Bool',
+        `Expected a bool predicate to ${node.kind}`,
+      );
 
       stack.pop();
 
-      return result;
+      return [node, t.Bool()];
+    }
 
     case 'AND':
-    case 'OR':
+    case 'OR': {
       for (const [arg, arg_t] of node.args.map(n => check(n, stack))) {
         invariant(arg_t.type === 'Bool', 'Expected a bool argument');
       }
-      return [node, Bool()];
+      return [node, t.Bool()];
+    }
+
+    case 'NOT': {
+      const [, pred_t] = check(node.predicate, stack);
+      invariant(pred_t.type === 'Bool', 'Expected a bool argument to NOT');
+      return [node, t.Bool()];
+    }
 
     case 'Equivalence':
     case 'Implication': {
@@ -131,32 +154,36 @@ function check(node: Node, stack: Stack): [Node, TypeInfo] {
         right_t.type === 'Bool',
         'Expected left side to be boolean expression',
       );
-      return [node, Bool()];
+      return [node, t.Bool()];
     }
 
     case 'Comparison': {
       const [, left_t] = check(node.left, stack);
       const [, right_t] = check(node.right, stack);
       invariant(
-        left_t.type === right_t.type,
+        isCompatible(left_t, right_t),
         'Expected left/right to be the same type',
       );
-      return [node, Bool()];
+      return [node, t.Bool()];
     }
 
-    case 'Identifier':
+    case 'Identifier': {
       // Check the variable exists
       const type = stack.getType(node.name);
       return [node, type];
+    }
 
-    case 'NumberLiteral':
-      return [node, Int()];
+    case 'NumberLiteral': {
+      return [node, t.Int()];
+    }
 
-    case 'StringLiteral':
-      return [node, String()];
+    case 'StringLiteral': {
+      return [node, t.String()];
+    }
 
-    case 'NullLiteral':
-      return [node, Null()];
+    case 'NullLiteral': {
+      return [node, t.Null()];
+    }
 
     case 'RelationSelection':
     case 'FieldSelection': {

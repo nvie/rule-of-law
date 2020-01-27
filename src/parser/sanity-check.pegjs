@@ -19,8 +19,8 @@ Document
 
 
 Rule
-  = RULE name:StringLiteral quantifier:Quantifier
-    { return ast.Rule(name.value, quantifier) }
+  = RULE name:StringLiteral predicate:Predicate
+    { return ast.Rule(name.value, predicate) }
 
 
 Identifier
@@ -34,17 +34,13 @@ Identifier
 
 
 Predicate
-  = Quantifier
-
-  / Pred2
-
-
-Quantifier
   = FORALL set:Identifier variable:Identifier COLON predicate:Predicate
     { return ast.ForAll(set, variable, predicate) }
 
   / EXISTS set:Identifier variable:Identifier COLON predicate:Predicate
     { return ast.Exists(set, variable, predicate) }
+
+  / Pred2
 
 
 Pred2

@@ -67,7 +67,8 @@ export type NotNode = {|
 |};
 
 export type PredicateNode =
-  | QuantifierNode
+  | ForAllNode
+  | ExistsNode
   | AndNode
   | OrNode
   | NotNode
@@ -87,8 +88,6 @@ export type LiteralNode =
   | NumberLiteralNode
   | StringLiteralNode;
 
-export type QuantifierNode = ForAllNode | ExistsNode;
-
 export type ForAllNode = {|
   kind: 'ForAll',
   set: IdentifierNode,
@@ -101,7 +100,7 @@ export type IdentifierNode = {| kind: 'Identifier', name: string |};
 export type RuleNode = {|
   kind: 'Rule',
   name: string,
-  quantifier: QuantifierNode,
+  predicate: PredicateNode,
 |};
 
 export type ComparisonNode = {|
@@ -111,10 +110,10 @@ export type ComparisonNode = {|
   right: ExprNode,
 |};
 
-const Rule = (name: string, quantifier: QuantifierNode): RuleNode => ({
+const Rule = (name: string, predicate: PredicateNode): RuleNode => ({
   kind: 'Rule',
   name,
-  quantifier,
+  predicate,
 });
 
 const Identifier = (name: string): IdentifierNode => ({
