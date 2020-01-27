@@ -1,5 +1,7 @@
 // @flow strict
 
+export type Node = DocumentNode | RuleNode | PredicateNode;
+
 export type ComparisonOperator = '=' | '!=' | '<' | '>' | '<=' | '>=';
 
 export type DocumentNode = {|
@@ -74,6 +76,7 @@ export type PredicateNode =
   | ExprNode;
 
 export type ExprNode =
+  | ComparisonNode
   | FieldSelectionNode
   | RelationSelectionNode
   | LiteralNode
