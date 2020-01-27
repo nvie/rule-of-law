@@ -1,8 +1,10 @@
 // @flow
 
-const commander = require('commander');
-const parser = require('../parser');
-const check = require('../checker').default;
+import ast from '../ast';
+import check from '../checker';
+import commander from 'commander';
+import simplify from '../simplifier';
+import { parseFile } from '../parser';
 
 type Options = {|
   verbose: boolean,
@@ -10,9 +12,10 @@ type Options = {|
 
 function runWithOptions(options: Options, args: Array<string>) {
   const [inputFile] = args;
-  const ast = parser.parseFile(inputFile);
-  const typedAst = check(ast);
-  console.log(JSON.stringify(typedAst, null, 2));
+  const ast = parseFile(inputFile);
+  check(ast);
+  const simplifiedAst = simplify(ast);
+  console.log(JSON.stringify(simplifiedAst, null, 2));
 }
 
 async function main() {
