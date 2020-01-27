@@ -5,64 +5,64 @@ export type Node = DocumentNode | RuleNode | PredicateNode;
 export type ComparisonOperator = '=' | '!=' | '<' | '>' | '<=' | '>=';
 
 export type DocumentNode = {|
-  type: 'Document',
+  kind: 'Document',
   rules: Array<RuleNode>,
 |};
 
 export type NullLiteralNode = {|
-  type: 'NullLiteral',
+  kind: 'NullLiteral',
 |};
 
 export type NumberLiteralNode = {|
-  type: 'NumberLiteral',
+  kind: 'NumberLiteral',
   value: number,
 |};
 
 export type StringLiteralNode = {|
-  type: 'StringLiteral',
+  kind: 'StringLiteral',
   value: string,
 |};
 
 export type ExistsNode = {|
-  type: 'Exists',
+  kind: 'Exists',
   set: IdentifierNode,
   variable: IdentifierNode,
   predicate: PredicateNode,
 |};
 
 export type FieldSelectionNode = {|
-  type: 'FieldSelection',
+  kind: 'FieldSelection',
   expr: ExprNode,
   field: IdentifierNode,
 |};
 
 export type RelationSelectionNode = {|
-  type: 'RelationSelection',
+  kind: 'RelationSelection',
   expr: ExprNode,
   field: IdentifierNode,
 |};
 
 export type ImplicationNode = {|
-  type: 'Implication',
+  kind: 'Implication',
   left: PredicateNode,
   right: PredicateNode,
 |};
 
 export type EquivalenceNode = {|
-  type: 'Equivalence',
+  kind: 'Equivalence',
   left: PredicateNode,
   right: PredicateNode,
 |};
 
 export type AndNode = {|
-  type: 'AND',
+  kind: 'AND',
   args: Array<PredicateNode>,
 |};
 
-export type OrNode = {| type: 'OR', args: Array<PredicateNode> |};
+export type OrNode = {| kind: 'OR', args: Array<PredicateNode> |};
 
 export type NotNode = {|
-  type: 'NOT',
+  kind: 'NOT',
   predicate: PredicateNode,
 |};
 
@@ -90,35 +90,35 @@ export type LiteralNode =
 export type QuantifierNode = ForAllNode | ExistsNode;
 
 export type ForAllNode = {|
-  type: 'ForAll',
+  kind: 'ForAll',
   set: IdentifierNode,
   variable: IdentifierNode,
   predicate: PredicateNode,
 |};
 
-export type IdentifierNode = {| type: 'Identifier', name: string |};
+export type IdentifierNode = {| kind: 'Identifier', name: string |};
 
 export type RuleNode = {|
-  type: 'Rule',
+  kind: 'Rule',
   name: string,
   quantifier: QuantifierNode,
 |};
 
 export type ComparisonNode = {|
-  type: 'Comparison',
+  kind: 'Comparison',
   op: ComparisonOperator,
   left: ExprNode,
   right: ExprNode,
 |};
 
 const Rule = (name: string, quantifier: QuantifierNode): RuleNode => ({
-  type: 'Rule',
+  kind: 'Rule',
   name,
   quantifier,
 });
 
 const Identifier = (name: string): IdentifierNode => ({
-  type: 'Identifier',
+  kind: 'Identifier',
   name,
 });
 
@@ -127,7 +127,7 @@ const Exists = (
   variable: IdentifierNode,
   predicate: PredicateNode,
 ): ExistsNode => ({
-  type: 'Exists',
+  kind: 'Exists',
   set,
   variable,
   predicate,
@@ -138,7 +138,7 @@ const ForAll = (
   variable: IdentifierNode,
   predicate: PredicateNode,
 ): ForAllNode => ({
-  type: 'ForAll',
+  kind: 'ForAll',
   set,
   variable,
   predicate,
@@ -147,21 +147,21 @@ const ForAll = (
 const Implication = (
   left: PredicateNode,
   right: PredicateNode,
-): ImplicationNode => ({ type: 'Implication', left, right });
+): ImplicationNode => ({ kind: 'Implication', left, right });
 
 const Equivalence = (
   left: PredicateNode,
   right: PredicateNode,
-): EquivalenceNode => ({ type: 'Equivalence', left, right });
+): EquivalenceNode => ({ kind: 'Equivalence', left, right });
 
-const NOT = (predicate: PredicateNode): NotNode => ({ type: 'NOT', predicate });
+const NOT = (predicate: PredicateNode): NotNode => ({ kind: 'NOT', predicate });
 
-const AND = (args: Array<PredicateNode>): AndNode => ({ type: 'AND', args });
+const AND = (args: Array<PredicateNode>): AndNode => ({ kind: 'AND', args });
 
-const OR = (args: Array<PredicateNode>): OrNode => ({ type: 'OR', args });
+const OR = (args: Array<PredicateNode>): OrNode => ({ kind: 'OR', args });
 
 const Document = (rules: Array<RuleNode>): DocumentNode => ({
-  type: 'Document',
+  kind: 'Document',
   rules,
 });
 
@@ -170,21 +170,21 @@ const Comparison = (
   left: ExprNode,
   right: ExprNode,
 ): ComparisonNode => ({
-  type: 'Comparison',
+  kind: 'Comparison',
   op,
   left,
   right,
 });
 
-const NullLiteral = (): NullLiteralNode => ({ type: 'NullLiteral' });
+const NullLiteral = (): NullLiteralNode => ({ kind: 'NullLiteral' });
 
 const NumberLiteral = (value: number): NumberLiteralNode => ({
-  type: 'NumberLiteral',
+  kind: 'NumberLiteral',
   value,
 });
 
 const StringLiteral = (value: string): StringLiteralNode => ({
-  type: 'StringLiteral',
+  kind: 'StringLiteral',
   value,
 });
 
@@ -192,7 +192,7 @@ const FieldSelection = (
   expr: ExprNode,
   field: IdentifierNode,
 ): FieldSelectionNode => ({
-  type: 'FieldSelection',
+  kind: 'FieldSelection',
   expr,
   field,
 });
@@ -201,7 +201,7 @@ const RelationSelection = (
   expr: ExprNode,
   field: IdentifierNode,
 ): RelationSelectionNode => ({
-  type: 'RelationSelection',
+  kind: 'RelationSelection',
   expr,
   field,
 });
