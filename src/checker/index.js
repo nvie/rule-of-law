@@ -2,15 +2,41 @@
 
 import fs from 'fs';
 import type { Node, IdentifierNode } from '../ast';
+import invariant from 'invariant';
 
 type TypeInfo =
-  | {| type: 'String' |}
-  | {| type: 'Int' |}
-  | {| type: 'Boolean' |}
+  | {| type: 'String', alias?: string |}
+  | {| type: 'Int', alias?: string |}
+  | {| type: 'Bool', alias?: string |}
+  | {| type: 'Null', alias?: string |}
+  | {| type: 'TODO', alias?: string |}
   | {|
-      type: 'UserDefined',
-      name: string, // e.g. Order, Prescription, etc.
+      type: 'Record',
+      alias?: string,
+      record: { [string]: TypeInfo }, // e.g. Order, Prescription, etc.
     |};
+
+const Int = (): TypeInfo => ({ type: 'Int' });
+const String = (): TypeInfo => ({ type: 'String' });
+const Bool = (): TypeInfo => ({ type: 'Bool' });
+const Null = (): TypeInfo => ({ type: 'Null' });
+const TODO = (): TypeInfo => ({ type: 'TODO' });
+const Record = (alias: string, record: { [string]: TypeInfo }): TypeInfo => ({
+  type: 'Record',
+  alias,
+  record,
+});
+
+// Some hacks to fake that we already have an external oracle for telling us
+// named types
+// TODO: Obviously replace this with the real thing later
+const OrderType = () =>
+  Record('Order', {
+    id: Int(),
+    orderNo: String(),
+    status: String(),
+    isEnabled: Bool(),
+  });
 
 type Scope = {|
   // All variables defined in this scope
@@ -62,8 +88,8 @@ class Stack {
   }
 }
 
-function check(node: Node, stack: Stack): Node {
-  switch (node.type) {
+function check(node: Node, stack: Stack): [Node, TypeInfo] {
+  switch (node.kind) {
     case 'Document':
       node.rules.map(node => check(node, stack));
       return node;
@@ -75,61 +101,85 @@ function check(node: Node, stack: Stack): Node {
     case 'ForAll':
     case 'Exists':
       stack.push();
-      stack.setType(node.variable.name, {
-        type: 'UserDefined',
-        name: node.set.name,
-      });
+
+      const fakeType = OrderType(); // TODO: Replace with a dynamic value
+      stack.setType(node.variable.name, fakeType);
+
       // TODO: Check that node.predicate is boolean!
-      const newNode = check(node.predicate, stack);
+      const result = check(node.predicate, stack);
+
       stack.pop();
-      return newNode;
+
+      return result;
 
     case 'AND':
     case 'OR':
-      // TODO: Check that all args are boolean!
-      node.args.map(node => check(node, stack));
-      return node;
+      for (const [arg, arg_t] of node.args.map(n => check(n, stack))) {
+        invariant(arg_t.type === 'Bool', 'Expected a bool argument');
+      }
+      return [node, Bool()];
 
     case 'Equivalence':
-    case 'Implication':
-      // TODO: Check that both sides are boolean!
-      check(node.left, stack);
-      check(node.right, stack);
-      return node;
+    case 'Implication': {
+      const [left, left_t] = check(node.left, stack);
+      const [right, right_t] = check(node.right, stack);
+      invariant(
+        left_t.type === 'Bool',
+        'Expected left side to be boolean expression',
+      );
+      invariant(
+        right_t.type === 'Bool',
+        'Expected left side to be boolean expression',
+      );
+      return [node, Bool()];
+    }
 
-    case 'Comparison':
-      // TODO: Check that both sides are the same type!
-      check(node.left, stack);
-      check(node.right, stack);
-      return node;
+    case 'Comparison': {
+      const [, left_t] = check(node.left, stack);
+      const [, right_t] = check(node.right, stack);
+      invariant(
+        left_t.type === right_t.type,
+        'Expected left/right to be the same type',
+      );
+      return [node, Bool()];
+    }
 
     case 'Identifier':
       // Check the variable exists
-      stack.getType(node.name);
-      return node;
+      const type = stack.getType(node.name);
+      return [node, type];
 
     case 'NumberLiteral':
-    case 'StringLiteral':
-    case 'NullLiteral':
-      // TODO: Return a different type for each here!
-      return node;
+      return [node, Int()];
 
-    case 'FieldSelection':
+    case 'StringLiteral':
+      return [node, String()];
+
+    case 'NullLiteral':
+      return [node, Null()];
+
     case 'RelationSelection':
-      // TODO: Check that node.expr is a custom type
-      check(node.expr, stack);
-      // TODO: Check that node.field is a field that exists in the custom type
-      // (do not look it up in the stack, since it's not an open variable!)
-      check(node.field, stack);
-      return node;
+    case 'FieldSelection': {
+      const [, expr_t] = check(node.expr, stack);
+      if (expr_t.type === 'Record') {
+        const type = expr_t.record[node.field.name];
+        if (type !== undefined) {
+          return [node, type];
+        }
+      }
+
+      throw new Error(
+        `${expr_t.alias ?? expr_t.type} has no field \`${node.field.name}\``,
+      );
+    }
 
     default:
       throw new Error(
-        `Checker not yet implemented for node type "${node.type}". Please add a case!`,
+        `Checker not yet implemented for node type "${node.kind}". Please add a case!`,
       );
   }
 }
 
-export default function(node: Node): Node {
+export default function(node: Node): [Node, TypeInfo] {
   return check(node, new Stack());
 }

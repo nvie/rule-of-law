@@ -12,8 +12,10 @@ describe('checker', () => {
   });
 
   it('nested scope definitions', () => {
-    const doc = parsePredicate('forall Foo f: forall Bar b: f => b != 3');
-    expect(() => check(doc)).not.toThrow('x');
+    const doc = parsePredicate(
+      'forall Foo f: forall Bar b: f.isEnabled => b.isEnabled',
+    );
+    expect(() => check(doc)).not.toThrow('xxx');
   });
 
   it('double definitions are not allowed', () => {
@@ -23,7 +25,11 @@ describe('checker', () => {
 
   it('scopes work', () => {
     expect(() =>
-      check(parsePredicate('(forall Foo f: f) and (forall Foo f: f)')),
+      check(
+        parsePredicate(
+          '(forall Foo f: f.isEnabled) and (forall Foo f: f.isEnabled)',
+        ),
+      ),
     ).not.toThrow();
 
     expect(() =>
