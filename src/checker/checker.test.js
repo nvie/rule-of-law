@@ -35,10 +35,7 @@ describe('checker', () => {
   });
 
   it('logic', () => {
-    typeChecks(
-      'forall Test t: t.id != 3 and (t.maybeStr = t.maybeInt)',
-      t.Bool(),
-    );
+    typeChecks('forall Test t: t.id != 3', t.Bool());
   });
 
   it('nested scope definitions', () => {
@@ -62,7 +59,7 @@ describe('checker', () => {
     );
 
     doesNotTypeCheck(
-      '(forall Foo f: f) and f and (forall Foo f: f)',
+      '(forall Foo f: f.isEnabled) and f and (forall Foo f: f.isEnabled)',
       'Unknown variable `f`',
     );
   });
