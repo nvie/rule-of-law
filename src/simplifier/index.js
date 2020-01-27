@@ -42,6 +42,12 @@ function simplifyPredicate(node: PredicateNode): PredicateNode {
           child.variable,
           ast.NOT(simplifyPredicate(child.predicate)),
         );
+      } else if (child.kind === 'Exists') {
+        // NOTE: Contrary to intuition, we'll keep `not exists(x)` expressions
+        // around and not simplify them by DeMorgan'ing them into a `forall:
+        // not(x)`.  Not exists have a natural SQL equivalent (also named `NOT
+        // EXISTS`).
+        return ast.NOT(simplifyPredicate(child));
       } else {
         return ast.NOT(simplifyPredicate(child));
       }
