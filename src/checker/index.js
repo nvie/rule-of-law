@@ -181,6 +181,10 @@ function check(node: Node, stack: Stack): [Node, TypeInfo] {
       return [node, t.String()];
     }
 
+    case 'BoolLiteral': {
+      return [node, t.Bool()];
+    }
+
     case 'NullLiteral': {
       return [node, t.Null()];
     }

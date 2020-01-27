@@ -13,6 +13,11 @@ export type NullLiteralNode = {|
   kind: 'NullLiteral',
 |};
 
+export type BoolLiteralNode = {|
+  kind: 'BoolLiteral',
+  value: boolean,
+|};
+
 export type NumberLiteralNode = {|
   kind: 'NumberLiteral',
   value: number,
@@ -85,6 +90,7 @@ export type ExprNode =
 
 export type LiteralNode =
   | NullLiteralNode
+  | BoolLiteralNode
   | NumberLiteralNode
   | StringLiteralNode;
 
@@ -177,6 +183,11 @@ const Comparison = (
 
 const NullLiteral = (): NullLiteralNode => ({ kind: 'NullLiteral' });
 
+const BoolLiteral = (value: boolean): BoolLiteralNode => ({
+  kind: 'BoolLiteral',
+  value,
+});
+
 const NumberLiteral = (value: number): NumberLiteralNode => ({
   kind: 'NumberLiteral',
   value,
@@ -207,18 +218,19 @@ const RelationSelection = (
 
 export default {
   AND,
+  BoolLiteral,
   Comparison,
   Document,
   Equivalence,
   Exists,
   FieldSelection,
-  RelationSelection,
   ForAll,
   Identifier,
   Implication,
   NOT,
   NullLiteral,
   NumberLiteral,
+  RelationSelection,
   OR,
   Rule,
   StringLiteral,

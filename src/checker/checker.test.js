@@ -19,8 +19,11 @@ function doesNotTypeCheck(expr: string, msg?: string): void {
 
 describe('checker', () => {
   it('literals', () => {
+    typeChecks('false', t.Bool());
+    typeChecks('true', t.Bool());
     typeChecks('1', t.Int());
     typeChecks('"hey"', t.String());
+    typeChecks('null', t.Null());
     typeChecks('NULL', t.Null());
   });
 

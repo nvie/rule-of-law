@@ -2,13 +2,39 @@
 
 import ast from '../ast';
 import invariant from 'invariant';
-import type { Node, DocumentNode, RuleNode, PredicateNode } from '../ast';
+import type {
+  ComparisonOperator,
+  Node,
+  DocumentNode,
+  RuleNode,
+  PredicateNode,
+} from '../ast';
+
+function negateOp(op: ComparisonOperator): ComparisonOperator {
+  switch (op) {
+    case '=':
+      return '!=';
+    case '!=':
+      return '=';
+    case '<':
+      return '>=';
+    case '<=':
+      return '>';
+    case '>':
+      return '<=';
+    case '>=':
+      return '<';
+    default:
+      throw new Error('Unknown operator: ' + op);
+  }
+}
 
 function simplifyPredicate(node: PredicateNode): PredicateNode {
   switch (node.kind) {
     case 'FieldSelection':
     case 'RelationSelection':
     case 'NumberLiteral':
+    case 'BoolLiteral':
     case 'NullLiteral':
     case 'StringLiteral':
       return node;
@@ -30,7 +56,9 @@ function simplifyPredicate(node: PredicateNode): PredicateNode {
 
     case 'NOT': {
       const child = node.predicate;
-      if (child.kind === 'NOT') {
+      if (child.kind === 'BoolLiteral') {
+        return ast.BoolLiteral(!child.value);
+      } else if (child.kind === 'NOT') {
         return simplifyPredicate(child.predicate);
       } else if (child.kind === 'AND') {
         return simplifyPredicate(ast.OR(child.args.map(arg => ast.NOT(arg))));
@@ -48,16 +76,60 @@ function simplifyPredicate(node: PredicateNode): PredicateNode {
         // not(x)`.  Not exists have a natural SQL equivalent (also named `NOT
         // EXISTS`).
         return ast.NOT(simplifyPredicate(child));
+      } else if (child.kind === 'Comparison') {
+        return ast.Comparison(negateOp(child.op), child.left, child.right);
+      } else if (child.kind === 'Implication') {
+        return simplifyPredicate(ast.NOT(simplifyPredicate(child)));
       } else {
         return ast.NOT(simplifyPredicate(child));
       }
     }
 
-    case 'AND':
-      return ast.AND(node.args.map(arg => simplifyPredicate(arg)));
+    case 'AND': {
+      const args = [];
+      for (const arg_ of node.args) {
+        const arg = simplifyPredicate(arg_);
+        if (arg.kind === 'BoolLiteral') {
+          if (arg.value === true) {
+            // Ignore the true
+          } else {
+            // Break immediately if one of the args is a known `false`
+            return arg;
+          }
+        } else {
+          args.push(arg);
+        }
+      }
 
-    case 'OR':
-      return ast.OR(node.args.map(arg => simplifyPredicate(arg)));
+      return args.length > 1
+        ? ast.AND(args)
+        : args.length > 0
+        ? args[0]
+        : ast.BoolLiteral(true);
+    }
+
+    case 'OR': {
+      const args = [];
+      for (const arg_ of node.args) {
+        const arg = simplifyPredicate(arg_);
+        if (arg.kind === 'BoolLiteral') {
+          if (arg.value === false) {
+            // Ignore the true
+          } else {
+            // Break immediately if one of the args is a known `true`
+            return arg;
+          }
+        } else {
+          args.push(arg);
+        }
+      }
+
+      return args.length > 1
+        ? ast.OR(args)
+        : args.length > 0
+        ? args[0]
+        : ast.BoolLiteral(false);
+    }
 
     case 'ForAll':
       return ast.ForAll(

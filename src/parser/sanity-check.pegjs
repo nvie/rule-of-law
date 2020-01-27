@@ -122,8 +122,17 @@ Expr
 Literal
   = NULL
     { return ast.NullLiteral() }
+  / BoolLiteral
   / NumberLiteral
   / StringLiteral
+
+
+BoolLiteral
+  = TRUE
+    { return ast.BoolLiteral(true) }
+
+  / FALSE
+    { return ast.BoolLiteral(false) }
 
 
 NumberLiteral
@@ -165,6 +174,8 @@ OR     = _ 'or'      EOK
 AND    = _ 'and'     EOK
 NOT    = _ 'not'     EOK
 NULL   = _ 'null'i   EOK
+TRUE   = _ 'true'    EOK
+FALSE  = _ 'false'   EOK
 
 
 EOK "end of keyword"

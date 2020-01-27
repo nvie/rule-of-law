@@ -172,6 +172,11 @@ describe('expressions', () => {
     expect(parsePredicate('NULL')).toEqual(ast.NullLiteral());
   });
 
+  it('boolean literals', () => {
+    expect(parsePredicate('true')).toEqual(ast.BoolLiteral(true));
+    expect(parsePredicate('false')).toEqual(ast.BoolLiteral(false));
+  });
+
   it('number literals', () => {
     expect(parsePredicate('0')).toEqual(ast.NumberLiteral(0));
 
