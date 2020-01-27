@@ -28,6 +28,11 @@ Identifier
     { return ast.Identifier(name) }
 
 
+/* Variable */
+/*   = identifier:Identifier */
+/*     { return ast.Variable(identifier) } */
+
+
 Predicate
   = Quantifier
 
@@ -82,7 +87,7 @@ Pred6
 
 
 Pred7
-  = LPAREN predicate:Pred2 RPAREN
+  = LPAREN predicate:Predicate RPAREN
     { return predicate }
 
   / left:Expr op:( EQ / NEQ / LTE / GTE / LT / GT ) right:Expr
