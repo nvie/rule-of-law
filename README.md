@@ -1,3 +1,5 @@
+[![Build Status](https://github.com/nvie/sanity-check/workflows/test/badge.svg)](https://github.com/nvie/sanity-check/actions)
+
 # sanity-check
 
 Sanity-check is a logical predicate language and a tool that allows you to
