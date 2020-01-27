@@ -14,14 +14,17 @@ describe('empty document', () => {
 describe('predicates', () => {
   it('identifier', () => {
     expect(parsePredicate('x')).toEqual(ast.Identifier('x'));
+
     expect(parsePredicate('foo')).toEqual(ast.Identifier('foo'));
   });
 
   xit('identifier (quoted)', () => {
     expect(parsePredicate('`x`')).toEqual(ast.Identifier('x'));
+
     expect(parsePredicate('`can contains spaces`')).toEqual(
       ast.Identifier('can contain spaces'),
     );
+
     expect(parsePredicate('`x -> y`')).toEqual(ast.Identifier('x -> y'));
   });
 
@@ -29,6 +32,7 @@ describe('predicates', () => {
     expect(parsePredicate('x and y')).toEqual(
       ast.AND([ast.Identifier('x'), ast.Identifier('y')]),
     );
+
     expect(parsePredicate('x and y and z')).toEqual(
       ast.AND([ast.Identifier('x'), ast.Identifier('y'), ast.Identifier('z')]),
     );
@@ -38,6 +42,7 @@ describe('predicates', () => {
     expect(parsePredicate('x or y')).toEqual(
       ast.OR([ast.Identifier('x'), ast.Identifier('y')]),
     );
+
     expect(parsePredicate('x or y or z')).toEqual(
       ast.OR([ast.Identifier('x'), ast.Identifier('y'), ast.Identifier('z')]),
     );
@@ -51,6 +56,7 @@ describe('predicates', () => {
     expect(parsePredicate('x => y')).toEqual(
       ast.Implication(ast.Identifier('x'), ast.Identifier('y')),
     );
+
     expect(parsePredicate('x => y => z')).toEqual(
       ast.Implication(
         ast.Identifier('x'),
@@ -63,6 +69,7 @@ describe('predicates', () => {
     expect(parsePredicate('x <=> y')).toEqual(
       ast.Equivalence(ast.Identifier('x'), ast.Identifier('y')),
     );
+
     expect(parsePredicate('x <=> y <=> z')).toEqual(
       ast.Equivalence(
         ast.Identifier('x'),
@@ -161,26 +168,35 @@ describe('comparison operators', () => {
 describe('expressions', () => {
   it('null literal', () => {
     expect(parsePredicate('null')).toEqual(ast.NullLiteral());
+
     expect(parsePredicate('NULL')).toEqual(ast.NullLiteral());
   });
 
   it('number literals', () => {
     expect(parsePredicate('0')).toEqual(ast.NumberLiteral(0));
+
     expect(parsePredicate('1')).toEqual(ast.NumberLiteral(1));
+
     expect(parsePredicate('232132693127')).toEqual(
       ast.NumberLiteral(232132693127),
     );
+
     expect(parsePredicate('3.141592')).toEqual(ast.NumberLiteral(3.141592));
+
     expect(parsePredicate('0.0001')).toEqual(ast.NumberLiteral(0.0001));
+
     expect(parsePredicate('-0.0001')).toEqual(ast.NumberLiteral(-0.0001));
+
     expect(parsePredicate('-3.141592')).toEqual(ast.NumberLiteral(-3.141592));
   });
 
   it('string literals', () => {
     expect(parsePredicate('"hello"')).toEqual(ast.StringLiteral('hello'));
+
     expect(parsePredicate('"strings are double-quoted"')).toEqual(
       ast.StringLiteral('strings are double-quoted'),
     );
+
     expect(parsePredicate('"escaping \\"with quotes\\""')).toEqual(
       ast.StringLiteral('escaping "with quotes"'),
     );
