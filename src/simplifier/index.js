@@ -96,6 +96,11 @@ function simplifyPredicate(node: PredicateNode): PredicateNode {
             // Break immediately if one of the args is a known `false`
             return arg;
           }
+        } else if (arg.kind === 'AND') {
+          // "Unnest" ands, making them all the same level
+          for (const arg2 of arg.args) {
+            args.push(arg2);
+          }
         } else {
           args.push(arg);
         }
@@ -118,6 +123,11 @@ function simplifyPredicate(node: PredicateNode): PredicateNode {
           } else {
             // Break immediately if one of the args is a known `true`
             return arg;
+          }
+        } else if (arg.kind === 'OR') {
+          // "Unnest" ors, making them all the same level
+          for (const arg2 of arg.args) {
+            args.push(arg2);
           }
         } else {
           args.push(arg);

@@ -36,6 +36,20 @@ describe('predicates', () => {
     expect(parsePredicate('x and y and z')).toEqual(
       ast.AND([ast.Identifier('x'), ast.Identifier('y'), ast.Identifier('z')]),
     );
+
+    expect(parsePredicate('x and (y and z)')).toEqual(
+      ast.AND([
+        ast.Identifier('x'),
+        ast.AND([ast.Identifier('y'), ast.Identifier('z')]),
+      ]),
+    );
+
+    expect(parsePredicate('(x and y) and z')).toEqual(
+      ast.AND([
+        ast.AND([ast.Identifier('x'), ast.Identifier('y')]),
+        ast.Identifier('z'),
+      ]),
+    );
   });
 
   it('or', () => {
@@ -45,6 +59,20 @@ describe('predicates', () => {
 
     expect(parsePredicate('x or y or z')).toEqual(
       ast.OR([ast.Identifier('x'), ast.Identifier('y'), ast.Identifier('z')]),
+    );
+
+    expect(parsePredicate('x or (y or z)')).toEqual(
+      ast.OR([
+        ast.Identifier('x'),
+        ast.OR([ast.Identifier('y'), ast.Identifier('z')]),
+      ]),
+    );
+
+    expect(parsePredicate('(x or y) or z')).toEqual(
+      ast.OR([
+        ast.OR([ast.Identifier('x'), ast.Identifier('y')]),
+        ast.Identifier('z'),
+      ]),
     );
   });
 

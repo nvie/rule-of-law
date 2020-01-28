@@ -89,6 +89,35 @@ describe('simplifier', () => {
     expect(simplify(p('false => x'))).toEqual(p('true'));
   });
 
+  it('unnesting (x and (y and z)) ~> (x and y and z)', () => {
+    expect(simplify(p('x and (y and z)'))).toEqual(p('x and y and z'));
+    expect(simplify(p('(x and y) and z'))).toEqual(p('x and y and z'));
+    expect(simplify(p('(x and y) and (z1 and z2)'))).toEqual(
+      p('x and y and z1 and z2'),
+    );
+
+    expect(simplify(p('x or (y or z)'))).toEqual(p('x or y or z'));
+    expect(simplify(p('(x or y) or z'))).toEqual(p('x or y or z'));
+    expect(simplify(p('(x or y) or (z1 or z2)'))).toEqual(
+      p('x or y or z1 or z2'),
+    );
+
+    // But not if they're different operands
+    expect(simplify(p('x and (y or z)'))).toEqual(p('x and (y or z)'));
+    expect(simplify(p('(x or y) and z'))).toEqual(p('(x or y) and z'));
+    expect(simplify(p('x or (y and z)'))).toEqual(p('x or (y and z)'));
+    expect(simplify(p('(x and y) or z'))).toEqual(p('(x and y) or z'));
+  });
+
+  // TODO - would this be actually useful to optimize?
+  xit('remove duplicate predicates', () => {
+    expect(simplify(p('x and x and x'))).toEqual('x');
+    expect(simplify(p('x or x or x'))).toEqual('x');
+    expect(simplify(p('x or (y or (false or x)) or z'))).toEqual(
+      p('x or y or z'),
+    );
+  });
+
   xit('tautologies', () => {
     // expect(simplify(p('1 = 1.0'))).toEqual(p('true'));
     // expect(simplify(p('1 >= 1'))).toEqual(p('true'));
