@@ -15,6 +15,7 @@ function runWithOptions(options: Options, args: Array<string>) {
   const [inputFile] = args;
   const ast = parseFile(inputFile);
   check(ast);
+
   const simplifiedAst = simplify(ast);
   console.log(formatter(simplifiedAst));
 }
