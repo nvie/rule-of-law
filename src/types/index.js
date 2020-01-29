@@ -6,6 +6,7 @@ export type TypeInfo =
   | {| type: 'Empty', alias?: string |}
   | {| type: 'String', alias?: string |}
   | {| type: 'Int', alias?: string |}
+  | {| type: 'Date', alias?: string |}
   | {| type: 'Bool', alias?: string |}
   | {| type: 'Null', alias?: string |}
   | {|
@@ -20,6 +21,8 @@ const Empty = (): TypeInfo => ({ type: 'Empty' });
 const Int = (): TypeInfo => ({ type: 'Int' });
 
 const String = (): TypeInfo => ({ type: 'String' });
+
+const Date = (): TypeInfo => ({ type: 'Date' });
 
 const Bool = (): TypeInfo => ({ type: 'Bool' });
 
@@ -36,11 +39,12 @@ const Nullable = (ofType: TypeInfo, alias?: string): TypeInfo => {
 };
 
 export default {
+  Bool,
+  Date,
   Empty,
   Int,
-  String,
-  Bool,
   Null,
-  Record,
   Nullable,
+  Record,
+  String,
 };

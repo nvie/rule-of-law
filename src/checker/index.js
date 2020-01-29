@@ -14,6 +14,7 @@ const FakeRecordType = (alias: string) =>
     {
       id: t.Int(),
       str: t.String(),
+      dateCompleted: t.Nullable(t.Date()),
       maybeStr: t.Nullable(t.String()),
       maybeInt: t.Nullable(t.Int()),
       maybeBool: t.Nullable(t.Bool()),
@@ -87,6 +88,13 @@ function isCompatible(type1: TypeInfo, type2: TypeInfo): boolean {
   if (isPrimitive(type1) && isPrimitive(type2)) {
     return type1.type === type2.type;
   }
+
+  if (
+    (type1.type === 'Null' && type2.type === 'Null') ||
+    (type1.type === 'Nullable' && type2.type === 'Null') ||
+    (type2.type === 'Nullable' && type1.type === 'Null')
+  )
+    return true;
 
   if (type1.type === 'Nullable') {
     return isCompatible(type1.ofType, type2);

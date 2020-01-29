@@ -4,6 +4,7 @@ import ast from '../ast';
 import check from '../checker';
 import commander from 'commander';
 import simplify from '../simplifier';
+import formatter from '../formatter';
 import { parseFile } from '../parser';
 
 type Options = {|
@@ -15,7 +16,7 @@ function runWithOptions(options: Options, args: Array<string>) {
   const ast = parseFile(inputFile);
   check(ast);
   const simplifiedAst = simplify(ast);
-  console.log(JSON.stringify(simplifiedAst, null, 2));
+  console.log(formatter(simplifiedAst));
 }
 
 async function main() {

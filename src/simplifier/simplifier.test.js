@@ -38,9 +38,13 @@ describe('simplifier', () => {
   });
 
   it('not forall: x ~> exists: not(x)', () => {
-    expect(simplify(p('not (forall Foo foo: foo.isEnabled)'))).toEqual(
-      p('exists Foo foo: not foo.isEnabled'),
+    expect(simplify(p('not (forall Foo foo: foo.id = 1)'))).toEqual(
+      p('exists Foo foo: foo.id != 1'),
     );
+
+    expect(
+      simplify(p('not (forall Foo foo: forall Bar bar: foo.id = bar.id)')),
+    ).toEqual(p('exists Foo foo: exists Bar bar: foo.id != bar.id'));
 
     // not exists(x) will NOT get simplified!
     expect(simplify(p('not (exists Foo foo: foo.isEnabled)'))).toEqual(

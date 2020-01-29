@@ -68,7 +68,7 @@ function simplifyPredicate(node: PredicateNode): PredicateNode {
         return ast.Exists(
           child.set,
           child.variable,
-          ast.NOT(simplifyPredicate(child.predicate)),
+          simplifyPredicate(ast.NOT(child.predicate)),
         );
       } else if (child.kind === 'Exists') {
         // NOTE: Contrary to intuition, we'll keep `not exists(x)` expressions
@@ -78,7 +78,7 @@ function simplifyPredicate(node: PredicateNode): PredicateNode {
         return ast.NOT(simplifyPredicate(child));
       } else if (child.kind === 'Comparison') {
         return ast.Comparison(negateOp(child.op), child.left, child.right);
-      } else if (child.kind === 'Implication') {
+      } else if (child.kind === 'Equivalence' || child.kind === 'Implication') {
         return simplifyPredicate(ast.NOT(simplifyPredicate(child)));
       } else {
         return ast.NOT(simplifyPredicate(child));
