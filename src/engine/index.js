@@ -15,44 +15,11 @@ type Alias = {|
   alias: string,
 |};
 
-type SQLCondition =
-  | {| type: 'AND', args: Array<SQLCondition> |}
-  | {| type: 'OR', args: Array<SQLCondition> |}
-  | {| type: 'Atom', raw: string |};
-
-class QueryBuilder {
-  comment: string | void;
-  selectFields: Array<Alias>;
-  fromTables: Array<Alias>;
-  whereConditions: Array<SQLCondition>;
-
-  constructor() {
-    this.comment = undefined;
-    this.selectFields = [];
-    this.fromTables = [];
-    this.whereConditions = [];
-  }
-
-  addComment(comment: string): this {
-    this.comment = comment;
-    return this;
-  }
-
-  addField(name: string, alias: string): this {
-    this.selectFields.push({ name, alias });
-    return this;
-  }
-
-  addTable(name: string, alias: string): this {
-    this.fromTables.push({ name, alias });
-    return this;
-  }
-
-  addCondition(cond: SQLCondition): this {
-    this.whereConditions.push(cond);
-    return this;
-  }
-}
+type SQLParts = {|
+  fields: Array<string>,
+  tables: Array<Alias>,
+  condition: string,
+|};
 
 function lines(lines: Array<string>): string {
   return lines.join('\n');
@@ -62,7 +29,11 @@ function wrap(s: string): string {
   return `(${s})`;
 }
 
-function predToSQL(node: PredicateNode): string {
+function wrapS(s: SQLParts): SQLParts {
+  return { ...s, condition: wrap(s.condition) };
+}
+
+function exprToSQL(node: ExprNode): string {
   switch (node.kind) {
     case 'NullLiteral':
       return 'NULL';
@@ -75,8 +46,34 @@ function predToSQL(node: PredicateNode): string {
     case 'Identifier':
       return node.name;
 
-    case 'FieldSelection':
-      return `${predToSQL(node.expr)}.${predToSQL(node.field)}`;
+    default:
+      throw new Error(
+        `Don't know how to simplify expr nodes of kind ${node.kind}`,
+      );
+  }
+}
+
+function predToSQL(node: PredicateNode): SQLParts {
+  switch (node.kind) {
+    case 'NullLiteral':
+    case 'BoolLiteral':
+    case 'NumberLiteral':
+    case 'StringLiteral':
+    case 'Identifier':
+      return {
+        fields: [],
+        tables: [],
+        condition: exprToSQL(node),
+      };
+
+    case 'FieldSelection': {
+      const expr = `${exprToSQL(node.expr)}.${exprToSQL(node.field)}`;
+      return {
+        fields: [expr],
+        tables: [],
+        condition: expr,
+      };
+    }
 
     case 'Comparison': {
       let op = node.op;
@@ -95,17 +92,40 @@ function predToSQL(node: PredicateNode): string {
         }
       }
 
-      return `${predToSQL(node.left)} ${op} ${predToSQL(node.right)}`;
+      const left = predToSQL(node.left);
+      const right = predToSQL(node.right);
+      return {
+        fields: [...left.fields, ...right.fields],
+        tables: [...left.tables, ...right.tables],
+        condition: `${left.condition} ${op} ${right.condition}`,
+      };
     }
 
-    case 'AND':
-      return node.args.map(arg => wrap(predToSQL(arg))).join(' AND ');
+    case 'AND': {
+      const legs = node.args.map(arg => wrapS(predToSQL(arg)));
+      return legs.reduce((result, leg) => ({
+        fields: [...result.fields, ...leg.fields],
+        tables: [...result.tables, ...leg.tables],
+        condition: `${result.condition} AND ${leg.condition}`,
+      }));
+    }
 
-    case 'OR':
-      return node.args.map(arg => wrap(predToSQL(arg))).join(' OR ');
+    case 'OR': {
+      const legs = node.args.map(arg => wrapS(predToSQL(arg)));
+      return legs.reduce((result, leg) => ({
+        fields: [...result.fields, ...leg.fields],
+        tables: [...result.tables, ...leg.tables],
+        condition: `${result.condition} OR ${leg.condition}`,
+      }));
+    }
 
-    case 'NOT':
-      return `NOT (${predToSQL(node.predicate)})`;
+    case 'NOT': {
+      const result = predToSQL(node.predicate);
+      return {
+        ...result,
+        condition: `NOT (${result.condition})`,
+      };
+    }
 
     // case 'ForAll':
     //   return `SELECT * FROM ${predToSQL(node.set)} ${predToSQL(
@@ -113,20 +133,61 @@ function predToSQL(node: PredicateNode): string {
     //   )} WHERE ${predToSQL(node.predicate)}`;
 
     case 'Exists':
-      return lines([
-        'SELECT',
-        '  *',
-        'FROM',
-        `  ${predToSQL(node.set)} ${predToSQL(node.variable)}`,
-        'WHERE',
-        `  ${predToSQL(node.predicate)}`,
-      ]);
+      const result = predToSQL(node.predicate);
+      return {
+        fields: [
+          // Add PKs here
+          // TODO: Don't hard-code `id` eventually, but for now this is fine
+          node.variable.name + '.id',
+          ...result.fields,
+        ],
+        tables: [
+          { name: node.set.name, alias: node.variable.name },
+          ...result.tables,
+        ],
+        condition: result.condition,
+      };
 
     default:
       throw new Error(
         `Don't know how to convert nodes of ${node.kind} to SQL yet`,
       );
   }
+}
+
+// TODO: DRY THIS UP
+function indent(n: number, text: string): string {
+  return text
+    .split('\n')
+    .map(line => ' '.repeat(n) + line)
+    .join('\n');
+}
+
+function uniq(items: Array<string>): Array<string> {
+  const seen = new Set();
+  const result = [];
+  for (const item of items) {
+    if (!seen.has(item)) {
+      seen.add(item);
+      result.push(item);
+    }
+  }
+  return result;
+}
+
+function sqlToString(sql: SQLParts): string {
+  return lines([
+    'SELECT',
+    indent(2, uniq(sql.fields).join(',\n')),
+    'FROM',
+    indent(
+      2,
+      uniq(sql.tables.map(alias => `${alias.name} ${alias.alias}`)).join(',\n'),
+    ),
+    'WHERE',
+    indent(2, sql.condition),
+    'LIMIT 1',
+  ]);
 }
 
 export function executeRule(rule: RuleNode): string {
@@ -138,7 +199,7 @@ export function executeRule(rule: RuleNode): string {
 
   return lines([
     `-- ${findCounterExample ? `[counter example] ${rule.name}` : rule.name}`,
-    predToSQL(execNode),
+    sqlToString(predToSQL(execNode)),
   ]);
 }
 
