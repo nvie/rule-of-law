@@ -5,6 +5,7 @@ import check from '../checker';
 import commander from 'commander';
 import simplify from '../simplifier';
 import formatter from '../formatter';
+import execute from '../engine';
 import { parseFile } from '../parser';
 
 type Options = {|
@@ -16,8 +17,8 @@ function runWithOptions(options: Options, args: Array<string>) {
   const ast = parseFile(inputFile);
   check(ast);
 
-  const simplifiedAst = simplify(ast);
-  console.log(formatter(simplifiedAst));
+  const sql = execute(ast);
+  console.log(sql);
 }
 
 async function main() {

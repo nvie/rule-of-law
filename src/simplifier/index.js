@@ -29,7 +29,7 @@ function negateOp(op: ComparisonOperator): ComparisonOperator {
   }
 }
 
-function simplifyPredicate(node: PredicateNode): PredicateNode {
+export function simplifyPredicate(node: PredicateNode): PredicateNode {
   switch (node.kind) {
     case 'FieldSelection':
     case 'RelationSelection':
