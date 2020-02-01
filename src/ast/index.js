@@ -79,6 +79,7 @@ export type ImplicationNode = {|
 
 export type EquivalenceNode = {|
   kind: 'Equivalence',
+  location: Location,
   left: PredicateNode,
   right: PredicateNode,
   level: 2,

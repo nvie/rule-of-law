@@ -1,10 +1,19 @@
 // @flow strict
 
 import fs from 'fs';
-import type { Node, IdentifierNode } from '../ast';
+import type { Location, Node, IdentifierNode } from '../ast';
 import type { TypeInfo } from '../types';
 import t from '../types';
 import invariant from 'invariant';
+
+export class TypeCheckError extends Error {
+  location: Location;
+
+  constructor(msg: string, location: Location) {
+    super(msg);
+    this.location = location;
+  }
+}
 
 // Some hacks to fake that we already have an external oracle for telling us
 // named types
@@ -60,14 +69,6 @@ class Stack {
     return null;
   }
 
-  getType(name: string): TypeInfo {
-    const value = this.getTypeOrNull(name);
-    if (value === null) {
-      throw new Error(`Unknown variable \`${name}\``);
-    }
-    return value;
-  }
-
   setType(name: string, value: TypeInfo) {
     const existingValue = this.getTypeOrNull(name);
     if (existingValue !== null) {
@@ -117,7 +118,12 @@ function check(node: Node, stack: Stack): [Node, TypeInfo] {
 
     case 'Rule': {
       const [, pred_t] = check(node.predicate, stack);
-      invariant(pred_t.type === 'Bool', 'Expected a bool predicate');
+      if (pred_t.type !== 'Bool') {
+        throw new TypeCheckError(
+          `A predicate must be a Bool (but found ${pred_t.type})`,
+          node.predicate.location,
+        );
+      }
       return [node, t.Bool()];
     }
 
@@ -126,13 +132,19 @@ function check(node: Node, stack: Stack): [Node, TypeInfo] {
       stack.push();
 
       const fakeType = FakeRecordType(node.set.name); // TODO: Replace with a dynamic value
-      stack.setType(node.variable.name, fakeType);
+      try {
+        stack.setType(node.variable.name, fakeType);
+      } catch (e) {
+        throw new TypeCheckError(e.message, node.variable.location);
+      }
 
       const [, pred_t] = check(node.predicate, stack);
-      invariant(
-        pred_t.type === 'Bool',
-        `Expected a bool predicate to ${node.kind}`,
-      );
+      if (pred_t.type !== 'Bool') {
+        throw new TypeCheckError(
+          `A predicate must be a Bool (but found ${pred_t.type})`,
+          node.predicate.location,
+        );
+      }
 
       stack.pop();
 
@@ -157,30 +169,42 @@ function check(node: Node, stack: Stack): [Node, TypeInfo] {
     case 'Implication': {
       const [left, left_t] = check(node.left, stack);
       const [right, right_t] = check(node.right, stack);
-      invariant(
-        left_t.type === 'Bool',
-        'Expected left side to be boolean expression',
-      );
-      invariant(
-        right_t.type === 'Bool',
-        'Expected left side to be boolean expression',
-      );
+      if (left_t.type !== 'Bool') {
+        throw new TypeCheckError(
+          'Expected left side to be boolean expression',
+          node.left.location,
+        );
+      }
+      if (right_t.type !== 'Bool') {
+        throw new TypeCheckError(
+          'Expected right side to be boolean expression',
+          node.right.location,
+        );
+      }
       return [node, t.Bool()];
     }
 
     case 'Comparison': {
       const [, left_t] = check(node.left, stack);
       const [, right_t] = check(node.right, stack);
-      invariant(
-        isCompatible(left_t, right_t),
-        'Expected left/right to be the same type',
-      );
+      if (!isCompatible(left_t, right_t)) {
+        throw new TypeCheckError(
+          `Left and right sides of ${node.op} must have the same type (${left_t.type} != ${right_t.type})`,
+          node.location,
+        );
+      }
       return [node, t.Bool()];
     }
 
     case 'Identifier': {
       // Check the variable exists
-      const type = stack.getType(node.name);
+      const type = stack.getTypeOrNull(node.name);
+      if (type === null) {
+        throw new TypeCheckError(
+          `Unknown variable ${node.name}`,
+          node.location,
+        );
+      }
       return [node, type];
     }
 
@@ -210,8 +234,11 @@ function check(node: Node, stack: Stack): [Node, TypeInfo] {
         }
       }
 
-      throw new Error(
-        `${expr_t.alias ?? expr_t.type} has no field \`${node.field.name}\``,
+      throw new TypeCheckError(
+        `${expr_t.alias ?? expr_t.type} type has no field \`${
+          node.field.name
+        }\``,
+        node.location,
       );
     }
 

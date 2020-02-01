@@ -175,7 +175,12 @@ function uniq(items: Array<string>): Array<string> {
 function sqlToString(sql: SQLParts): string {
   return lines([
     'SELECT',
-    indent(2, uniq(sql.fields).join(',\n')),
+    indent(
+      2,
+      uniq(sql.fields)
+        .map(f => `${f} AS \`${f}\``)
+        .join(',\n'),
+    ),
     'FROM',
     indent(
       2,

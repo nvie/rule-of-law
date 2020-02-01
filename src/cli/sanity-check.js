@@ -1,23 +1,44 @@
 // @flow
 
+import fs from 'fs';
 import ast from '../ast';
-import check from '../checker';
+import check_, { TypeCheckError } from '../checker';
 import commander from 'commander';
 import simplify from '../simplifier';
 import formatter from '../formatter';
 import execute from '../engine';
-import { parseFile } from '../parser';
+import { parseDocument, printFriendlyError } from '../parser';
+import type { DocumentNode } from '../ast';
 
 type Options = {|
   verbose: boolean,
 |};
 
+function check(doc: DocumentNode, inputString: string): void {
+  try {
+    check_(doc);
+  } catch (e) {
+    /**
+     * If this is a type check error, report this in a visually pleasing
+     * manner in the console.
+     */
+    if (e instanceof TypeCheckError) {
+      printFriendlyError(e, inputString, 'Type error');
+      process.exit(2);
+    } else {
+      throw e;
+    }
+  }
+}
+
 function runWithOptions(options: Options, args: Array<string>) {
   const [inputFile] = args;
-  const ast = parseFile(inputFile);
-  check(ast);
+  const inputString = fs.readFileSync(inputFile, 'utf-8');
 
-  const sql = execute(ast);
+  const doc = parseDocument(inputString);
+  check(doc, inputString);
+
+  const sql = execute(doc);
   console.log(sql);
 }
 

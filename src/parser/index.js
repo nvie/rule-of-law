@@ -1,18 +1,19 @@
 // @flow strict
 
-import fs from 'fs';
 import invariant from 'invariant';
 import parser from './generated-parser';
 import colors from 'colors';
 import { indent } from '../lib';
 import type { Node, DocumentNode, RuleNode, PredicateNode } from '../ast';
 
-function printFriendlyError(e, input) {
+export function printFriendlyError(e, input, errorTitle) {
   const lines = input.split('\n');
   const { start, end } = e.location;
 
   console.log('');
-  console.log(colors.cyan(`  Parse error ` + '-'.repeat(62)));
+  console.log(
+    colors.cyan(`  ${errorTitle} ` + '-'.repeat(73 - errorTitle.length)),
+  );
   console.log('');
 
   for (
@@ -20,14 +21,40 @@ function printFriendlyError(e, input) {
     lineno <= Math.min(end.line + 3, lines.length - 1);
     lineno++
   ) {
-    // offset, line, column
-    console.log(
-      `${colors.gray(lineno.toString().padStart(5, ' '))}  ${
-        lines[lineno - 1]
-      }`,
-    );
-    if (lineno === start.line) {
-      console.log(indent(6 + start.column, colors.red('^')));
+    const line = lines[lineno - 1];
+    console.log(`${colors.gray(lineno.toString().padStart(5, ' '))}  ${line}`);
+    if (lineno >= start.line && lineno <= end.line) {
+      // Don't print anything if this is just a whitespace line
+      if (line.trim().length > 0) {
+        // Four options:
+        // - start/end are on the same line
+        // - this is the start line
+        // - this is an "in between" line
+        // - this is the end line
+        if (start.line === end.line) {
+          console.log(
+            indent(
+              6 + start.column,
+              colors.red('^'.repeat(end.column - start.column - 1)),
+            ),
+          );
+        } else if (lineno === start.line) {
+          console.log(
+            indent(
+              6 + start.column,
+              colors.red('^'.repeat(line.length - start.column + 1)),
+            ),
+          );
+        } else if (lineno === end.line) {
+          if (end.column > 1) {
+            console.log(indent(7, colors.red('^'.repeat(end.column - 1))));
+          }
+        } else {
+          if (line.length > 0) {
+            console.log(indent(7, colors.red('^'.repeat(line.length))));
+          }
+        }
+      }
     }
   }
 
@@ -45,7 +72,7 @@ function parseString(input, options = {}): Node | void {
      * a visually pleasing manner in the console.
      */
     if (/SyntaxError/.test(e)) {
-      printFriendlyError(e, input);
+      printFriendlyError(e, input, 'Parse error');
       process.exit(1);
     } else {
       throw e;
@@ -69,8 +96,4 @@ export function parsePredicate(input: string): PredicateNode {
   const node = parseString(input, { startRule: 'Predicate' });
   invariant(node && node.kind === 'Predicate', 'Expected a Predicate');
   return node;
-}
-
-export function parseFile(path: string): DocumentNode {
-  return parseDocument(fs.readFileSync(path, 'utf-8'));
 }
