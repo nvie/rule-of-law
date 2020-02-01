@@ -1,8 +1,13 @@
 // @flow
 
 import invariant from 'invariant';
-import { parsePredicate as p } from '../parser';
+import { parsePredicate } from '../parser';
 import format from './index';
+import type { PredicateNode } from '../ast';
+
+function p(input: string): PredicateNode {
+  return parsePredicate(input, { noLocation: true });
+}
 
 describe('formatter', () => {
   it('x and y', () => {

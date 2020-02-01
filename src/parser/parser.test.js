@@ -2,8 +2,24 @@
 
 import ast from '../ast';
 import invariant from 'invariant';
-import type { RuleNode } from '../ast';
-import { parseDocument, parseRule, parsePredicate } from './index';
+import type { DocumentNode, RuleNode, PredicateNode } from '../ast';
+import {
+  parseDocument as parseDocument_,
+  parseRule as parseRule_,
+  parsePredicate as parsePredicate_,
+} from './index';
+
+function parseDocument(input: string): DocumentNode {
+  return parseDocument_(input, { noLocation: true });
+}
+
+function parseRule(input: string): RuleNode {
+  return parseRule_(input, { noLocation: true });
+}
+
+function parsePredicate(input: string): PredicateNode {
+  return parsePredicate_(input, { noLocation: true });
+}
 
 describe('empty document', () => {
   it('empty module', () => {

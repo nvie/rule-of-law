@@ -7,9 +7,9 @@ import t from '../types';
 import invariant from 'invariant';
 
 export class TypeCheckError extends Error {
-  location: Location;
+  location: Location | void;
 
-  constructor(msg: string, location: Location) {
+  constructor(msg: string, location?: Location) {
     super(msg);
     this.location = location;
   }
@@ -203,7 +203,7 @@ function check(node: Node, stack: Stack): [Node, TypeInfo] {
       const type = stack.getTypeOrNull(node.name);
       if (type === null) {
         throw new TypeCheckError(
-          `Unknown variable ${node.name}`,
+          `Unknown variable \`${node.name}\``,
           node.location,
         );
       }
