@@ -23,14 +23,9 @@ Rule
     { return ast.Rule(name.value, predicate) }
 
 
-Identifier
+Identifier "identifier"
   = name:$( [A-Za-z_][A-Za-z0-9_]* ) _
     { return ast.Identifier(name) }
-
-
-/* Variable */
-/*   = identifier:Identifier */
-/*     { return ast.Variable(identifier) } */
 
 
 Predicate
@@ -119,7 +114,7 @@ Expr
   / Identifier
 
 
-Literal
+Literal "literal value"
   = NULL
     { return ast.NullLiteral() }
   / BoolLiteral
