@@ -1,35 +1,52 @@
 // @flow strict
 
+export type Position = {|
+  offset: number,
+  line: number,
+  column: number,
+|};
+
+export type Location = {|
+  start: Position,
+  end: Position,
+|};
+
 export type Node = DocumentNode | RuleNode | PredicateNode;
 
 export type ComparisonOperator = '=' | '!=' | '<' | '>' | '<=' | '>=';
 
 export type DocumentNode = {|
   kind: 'Document',
+  location: Location,
   rules: Array<RuleNode>,
 |};
 
 export type NullLiteralNode = {|
   kind: 'NullLiteral',
+  location: Location,
 |};
 
 export type BoolLiteralNode = {|
   kind: 'BoolLiteral',
+  location: Location,
   value: boolean,
 |};
 
 export type NumberLiteralNode = {|
   kind: 'NumberLiteral',
+  location: Location,
   value: number,
 |};
 
 export type StringLiteralNode = {|
   kind: 'StringLiteral',
+  location: Location,
   value: string,
 |};
 
 export type ExistsNode = {|
   kind: 'Exists',
+  location: Location,
   set: IdentifierNode,
   variable: IdentifierNode,
   predicate: PredicateNode,
@@ -38,6 +55,7 @@ export type ExistsNode = {|
 
 export type FieldSelectionNode = {|
   kind: 'FieldSelection',
+  location: Location,
   expr: ExprNode,
   field: IdentifierNode,
   level: 8,
@@ -45,6 +63,7 @@ export type FieldSelectionNode = {|
 
 export type RelationSelectionNode = {|
   kind: 'RelationSelection',
+  location: Location,
   expr: ExprNode,
   field: IdentifierNode,
   level: 8,
@@ -52,6 +71,7 @@ export type RelationSelectionNode = {|
 
 export type ImplicationNode = {|
   kind: 'Implication',
+  location: Location,
   left: PredicateNode,
   right: PredicateNode,
   level: 3,
@@ -66,14 +86,21 @@ export type EquivalenceNode = {|
 
 export type AndNode = {|
   kind: 'AND',
+  location: Location,
   args: Array<PredicateNode>,
   level: 5,
 |};
 
-export type OrNode = {| kind: 'OR', args: Array<PredicateNode>, level: 4 |};
+export type OrNode = {|
+  kind: 'OR',
+  location: Location,
+  args: Array<PredicateNode>,
+  level: 4,
+|};
 
 export type NotNode = {|
   kind: 'NOT',
+  location: Location,
   predicate: PredicateNode,
   level: 6,
 |};
@@ -103,36 +130,49 @@ export type LiteralNode =
 
 export type ForAllNode = {|
   kind: 'ForAll',
+  location: Location,
   set: IdentifierNode,
   variable: IdentifierNode,
   predicate: PredicateNode,
   level: 1,
 |};
 
-export type IdentifierNode = {| kind: 'Identifier', name: string |};
+export type IdentifierNode = {|
+  kind: 'Identifier',
+  location: Location,
+  name: string,
+|};
 
 export type RuleNode = {|
   kind: 'Rule',
+  location: Location,
   name: string,
   predicate: PredicateNode,
 |};
 
 export type ComparisonNode = {|
   kind: 'Comparison',
+  location: Location,
   op: ComparisonOperator,
   left: ExprNode,
   right: ExprNode,
   level: 7,
 |};
 
-const Rule = (name: string, predicate: PredicateNode): RuleNode => ({
+const Rule = (
+  name: string,
+  predicate: PredicateNode,
+  location: Location,
+): RuleNode => ({
   kind: 'Rule',
+  location,
   name,
   predicate,
 });
 
-const Identifier = (name: string): IdentifierNode => ({
+const Identifier = (name: string, location: Location): IdentifierNode => ({
   kind: 'Identifier',
+  location,
   name,
 });
 
@@ -140,8 +180,10 @@ const Exists = (
   set: IdentifierNode,
   variable: IdentifierNode,
   predicate: PredicateNode,
+  location: Location,
 ): ExistsNode => ({
   kind: 'Exists',
+  location,
   set,
   variable,
   predicate,
@@ -152,8 +194,10 @@ const ForAll = (
   set: IdentifierNode,
   variable: IdentifierNode,
   predicate: PredicateNode,
+  location: Location,
 ): ForAllNode => ({
   kind: 'ForAll',
+  location,
   set,
   variable,
   predicate,
@@ -163,33 +207,54 @@ const ForAll = (
 const Implication = (
   left: PredicateNode,
   right: PredicateNode,
-): ImplicationNode => ({ kind: 'Implication', left, right, level: 3 });
+  location: Location,
+): ImplicationNode => ({
+  kind: 'Implication',
+  location,
+  left,
+  right,
+  level: 3,
+});
 
 const Equivalence = (
   left: PredicateNode,
   right: PredicateNode,
-): EquivalenceNode => ({ kind: 'Equivalence', left, right, level: 2 });
+  location: Location,
+): EquivalenceNode => ({
+  kind: 'Equivalence',
+  location,
+  left,
+  right,
+  level: 2,
+});
 
-const NOT = (predicate: PredicateNode): NotNode => ({
+const NOT = (predicate: PredicateNode, location: Location): NotNode => ({
   kind: 'NOT',
+  location,
   predicate,
   level: 6,
 });
 
-const AND = (args: Array<PredicateNode>): AndNode => ({
+const AND = (args: Array<PredicateNode>, location: Location): AndNode => ({
   kind: 'AND',
+  location,
   args,
   level: 5,
 });
 
-const OR = (args: Array<PredicateNode>): OrNode => ({
+const OR = (args: Array<PredicateNode>, location: Location): OrNode => ({
   kind: 'OR',
+  location,
   args,
   level: 4,
 });
 
-const Document = (rules: Array<RuleNode>): DocumentNode => ({
+const Document = (
+  rules: Array<RuleNode>,
+  location: Location,
+): DocumentNode => ({
   kind: 'Document',
+  location,
   rules,
 });
 
@@ -197,36 +262,52 @@ const Comparison = (
   op: ComparisonOperator,
   left: ExprNode,
   right: ExprNode,
+  location: Location,
 ): ComparisonNode => ({
   kind: 'Comparison',
+  location,
   op,
   left,
   right,
   level: 7,
 });
 
-const NullLiteral = (): NullLiteralNode => ({ kind: 'NullLiteral' });
+const NullLiteral = (location: Location): NullLiteralNode => ({
+  kind: 'NullLiteral',
+  location,
+});
 
-const BoolLiteral = (value: boolean): BoolLiteralNode => ({
+const BoolLiteral = (value: boolean, location: Location): BoolLiteralNode => ({
   kind: 'BoolLiteral',
+  location,
   value,
 });
 
-const NumberLiteral = (value: number): NumberLiteralNode => ({
+const NumberLiteral = (
+  value: number,
+  location: Location,
+): NumberLiteralNode => ({
   kind: 'NumberLiteral',
+  location,
   value,
 });
 
-const StringLiteral = (value: string): StringLiteralNode => ({
+const StringLiteral = (
+  value: string,
+  location: Location,
+): StringLiteralNode => ({
   kind: 'StringLiteral',
+  location,
   value,
 });
 
 const FieldSelection = (
   expr: ExprNode,
   field: IdentifierNode,
+  location: Location,
 ): FieldSelectionNode => ({
   kind: 'FieldSelection',
+  location,
   expr,
   field,
   level: 8,
@@ -235,8 +316,10 @@ const FieldSelection = (
 const RelationSelection = (
   expr: ExprNode,
   field: IdentifierNode,
+  location: Location,
 ): RelationSelectionNode => ({
   kind: 'RelationSelection',
+  location,
   expr,
   field,
   level: 8,
