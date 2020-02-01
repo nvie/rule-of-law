@@ -33,6 +33,8 @@ const FakeRecordType = (alias: string) =>
       orderNo: t.String(),
       status: t.String(),
       isEnabled: t.Bool(),
+      ndc: t.Int(),
+      isForPlaceboSkipping: t.Bool(),
     },
     alias,
   );
