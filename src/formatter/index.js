@@ -1,17 +1,9 @@
 // @flow strict
 
 import type { Node } from '../ast';
-import { indent } from './indent';
+import { indent, lines, sumBy } from '../lib';
 
 const WRAP_WIDTH = 70;
-
-function sumBy<T>(arr: Array<T>, keyFn: T => number): number {
-  return arr.reduce((total, cur) => total + keyFn(cur), 0);
-}
-
-function lines(lines: Array<string>): string {
-  return lines.join('\n');
-}
 
 function wrapInParens(text: string): string {
   return text.includes('\n') ? '(\n' + indent(2, text) + '\n)' : `(${text})`;

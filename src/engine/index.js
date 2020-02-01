@@ -8,6 +8,7 @@ import type {
   PredicateNode,
   ExprNode,
 } from '../ast';
+import { lines } from '../lib';
 import { simplifyPredicate } from '../simplifier';
 
 type Alias = {|
@@ -20,10 +21,6 @@ type SQLParts = {|
   tables: Array<Alias>,
   condition: string,
 |};
-
-function lines(lines: Array<string>): string {
-  return lines.join('\n');
-}
 
 function wrap(s: string): string {
   return `(${s})`;

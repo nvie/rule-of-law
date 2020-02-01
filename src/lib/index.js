@@ -19,3 +19,11 @@ export function indentIfMultiLine(
     ? `${pren}${indent(n, text)}${sufn}`
     : `${pre1}${text}${suf1}`;
 }
+
+export function sumBy<T>(arr: Array<T>, keyFn: T => number): number {
+  return arr.reduce((total, cur) => total + keyFn(cur), 0);
+}
+
+export function lines(lines: Array<string>): string {
+  return lines.join('\n');
+}
