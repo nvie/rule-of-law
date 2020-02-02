@@ -15,7 +15,11 @@ type ParseOptions = {|
   noLocation?: boolean,
 |};
 
-export function printFriendlyError(e, input, errorTitle) {
+export function printFriendlyError(
+  e: Error,
+  input: string,
+  errorTitle: string,
+) {
   const lines = input.split('\n');
 
   console.log('');
@@ -24,6 +28,7 @@ export function printFriendlyError(e, input, errorTitle) {
   );
   console.log('');
 
+  // $FlowFixMe - SyntaxError/TypeCheckError have an optional `location` field
   if (e.location) {
     const { start, end } = e.location;
     for (
