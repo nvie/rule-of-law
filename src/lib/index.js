@@ -24,6 +24,6 @@ export function sumBy<T>(arr: Array<T>, keyFn: T => number): number {
   return arr.reduce((total, cur) => total + keyFn(cur), 0);
 }
 
-export function lines(lines: Array<string>): string {
-  return lines.join('\n');
+export function lines(lines: Array<?string>): string {
+  return lines.filter(x => (x != null ? true : false)).join('\n');
 }

@@ -1,15 +1,17 @@
 // @flow strict
 
 import ast, { isLiteralNode, isExprNode } from '../ast';
-import type {
-  Node,
-  DocumentNode,
-  RuleNode,
-  PredicateNode,
-  ExprNode,
-} from '../ast';
+import invariant from 'invariant';
 import { lines } from '../lib';
 import { simplifyPredicate } from '../simplifier';
+import type {
+  DocumentNode,
+  ExprNode,
+  LiteralNode,
+  Node,
+  PredicateNode,
+  RuleNode,
+} from '../ast';
 
 type Alias = {|
   name: string,
@@ -30,44 +32,38 @@ function wrapS(s: SQLParts): SQLParts {
   return { ...s, condition: wrap(s.condition) };
 }
 
-function exprToSQL(node: ExprNode): string {
-  if (isLiteralNode(node)) {
-    if (node.kind === 'NullLiteral') {
-      return 'NULL';
-    } else {
-      return JSON.stringify(node.value);
-    }
+function simpleNodeToSQL(node: PredicateNode): string | null {
+  if (node.kind === 'NullLiteral') {
+    return 'NULL';
+  } else if (isLiteralNode(node)) {
+    return JSON.stringify(node.value);
+  } else if (node.kind === 'Identifier') {
+    return node.name;
   }
 
-  switch (node.kind) {
-    case 'Identifier':
-      return node.name;
-
-    case 'Comparison':
-      return `(${exprToSQL(node.left)}) ${node.op} (${exprToSQL(node.right)})`;
-
-    case 'FieldSelection':
-      return `${exprToSQL(node.expr)}.${exprToSQL(node.field)}`;
-
-    default:
-      throw new Error(
-        `Don't know how to simplify expr nodes of kind ${node.kind}`,
-      );
-  }
+  return null;
 }
 
 function predToSQLParts(node: PredicateNode): SQLParts {
-  if (isExprNode(node)) {
+  const simple = simpleNodeToSQL(node);
+  if (simple !== null) {
     return {
       fields: [],
       tables: [],
-      condition: exprToSQL(node),
+      condition: simple,
     };
   }
 
   switch (node.kind) {
     case 'FieldSelection': {
-      const expr = `${exprToSQL(node.expr)}.${exprToSQL(node.field)}`;
+      const expr1 = simpleNodeToSQL(node.expr);
+      const expr2 = simpleNodeToSQL(node.field);
+
+      invariant(
+        expr1 !== null && expr2 !== null,
+        'Expected both to be non-null',
+      );
+      const expr = `${expr1}.${expr2}`;
       return {
         fields: [expr],
         tables: [],
@@ -121,16 +117,30 @@ function predToSQLParts(node: PredicateNode): SQLParts {
 
     case 'NOT': {
       const result = predToSQLParts(node.predicate);
-      return {
-        ...result,
-        condition: `NOT (${result.condition})`,
-      };
-    }
 
-    // case 'ForAll':
-    //   return `SELECT * FROM ${predToSQLParts(node.set)} ${predToSQLParts(
-    //     node.variable,
-    //   )} WHERE ${predToSQLParts(node.predicate)}`;
+      if (node.predicate.kind === 'Exists') {
+        // Here, a big trick needs to happen!
+        // We'll generate a `NOT EXISTS (...)` subquery here.  We'll do this by
+        // first evaluating the sub-expression to a full-blown query (with all
+        // the query parts), but then removing any field selection and NOT'ing
+        // the entire result.
+
+        const subquery = sqlToString({
+          ...result,
+          fields: [], // Leads to "SELECT NULL FROM ..." in the subquery
+        });
+        return {
+          fields: [],
+          tables: [],
+          condition: lines(['NOT EXISTS (', indent(2, subquery), ')']),
+        };
+      } else {
+        return {
+          ...result,
+          condition: `NOT (${result.condition})`,
+        };
+      }
+    }
 
     case 'Exists':
       const result = predToSQLParts(node.predicate);
@@ -175,14 +185,14 @@ function uniq(items: Array<string>): Array<string> {
   return result;
 }
 
-function sqlToString(sql: SQLParts, limit: number): string {
+function sqlToString(sql: SQLParts, limit?: number): string {
   return lines([
     'SELECT',
     indent(
       2,
       uniq(sql.fields)
         .map(f => `${f} AS \`${f}\``)
-        .join(',\n'),
+        .join(',\n') || 'null',
     ),
     'FROM',
     indent(
@@ -191,7 +201,7 @@ function sqlToString(sql: SQLParts, limit: number): string {
     ),
     'WHERE',
     indent(2, sql.condition),
-    `LIMIT ${limit}`,
+    limit ? `LIMIT ${limit}` : null,
   ]);
 }
 
@@ -203,8 +213,11 @@ export function executeRule(rule: RuleNode): string {
   );
 
   return lines([
-    `-- ${counterExampleMode ? `[counter example] ${rule.name}` : rule.name}`,
-    sqlToString(predToSQLParts(execNode), counterExampleMode ? 10 + 1 : 1),
+    `-- ${rule.name}`,
+    counterExampleMode
+      ? `-- The following query will select all COUNTER EXAMPLES`
+      : null,
+    sqlToString(predToSQLParts(execNode), counterExampleMode ? undefined : 1),
   ]);
 }
 
