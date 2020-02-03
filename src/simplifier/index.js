@@ -1,6 +1,6 @@
 // @flow strict
 
-import ast from '../ast';
+import ast, { isExprNode } from '../ast';
 import invariant from 'invariant';
 import type {
   ComparisonOperator,
@@ -30,15 +30,11 @@ function negateOp(op: ComparisonOperator): ComparisonOperator {
 }
 
 export function simplifyPredicate(node: PredicateNode): PredicateNode {
-  switch (node.kind) {
-    case 'FieldSelection':
-    case 'RelationSelection':
-    case 'NumberLiteral':
-    case 'BoolLiteral':
-    case 'NullLiteral':
-    case 'StringLiteral':
-      return node;
+  if (isExprNode(node)) {
+    return node;
+  }
 
+  switch (node.kind) {
     case 'Equivalence': {
       return ast.AND([
         simplifyPredicate(ast.Implication(node.left, node.right)),

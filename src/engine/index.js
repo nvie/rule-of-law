@@ -1,6 +1,6 @@
 // @flow strict
 
-import ast from '../ast';
+import ast, { isLiteralNode, isExprNode } from '../ast';
 import type {
   Node,
   DocumentNode,
@@ -31,17 +31,23 @@ function wrapS(s: SQLParts): SQLParts {
 }
 
 function exprToSQL(node: ExprNode): string {
-  switch (node.kind) {
-    case 'NullLiteral':
+  if (isLiteralNode(node)) {
+    if (node.kind === 'NullLiteral') {
       return 'NULL';
-
-    case 'BoolLiteral':
-    case 'NumberLiteral':
-    case 'StringLiteral':
+    } else {
       return JSON.stringify(node.value);
+    }
+  }
 
+  switch (node.kind) {
     case 'Identifier':
       return node.name;
+
+    case 'Comparison':
+      return `(${exprToSQL(node.left)}) ${node.op} (${exprToSQL(node.right)})`;
+
+    case 'FieldSelection':
+      return `${exprToSQL(node.expr)}.${exprToSQL(node.field)}`;
 
     default:
       throw new Error(
@@ -50,19 +56,16 @@ function exprToSQL(node: ExprNode): string {
   }
 }
 
-function predToSQL(node: PredicateNode): SQLParts {
-  switch (node.kind) {
-    case 'NullLiteral':
-    case 'BoolLiteral':
-    case 'NumberLiteral':
-    case 'StringLiteral':
-    case 'Identifier':
-      return {
-        fields: [],
-        tables: [],
-        condition: exprToSQL(node),
-      };
+function predToSQLParts(node: PredicateNode): SQLParts {
+  if (isExprNode(node)) {
+    return {
+      fields: [],
+      tables: [],
+      condition: exprToSQL(node),
+    };
+  }
 
+  switch (node.kind) {
     case 'FieldSelection': {
       const expr = `${exprToSQL(node.expr)}.${exprToSQL(node.field)}`;
       return {
@@ -89,8 +92,8 @@ function predToSQL(node: PredicateNode): SQLParts {
         }
       }
 
-      const left = predToSQL(node.left);
-      const right = predToSQL(node.right);
+      const left = predToSQLParts(node.left);
+      const right = predToSQLParts(node.right);
       return {
         fields: [...left.fields, ...right.fields],
         tables: [...left.tables, ...right.tables],
@@ -99,7 +102,7 @@ function predToSQL(node: PredicateNode): SQLParts {
     }
 
     case 'AND': {
-      const legs = node.args.map(arg => wrapS(predToSQL(arg)));
+      const legs = node.args.map(arg => wrapS(predToSQLParts(arg)));
       return legs.reduce((result, leg) => ({
         fields: [...result.fields, ...leg.fields],
         tables: [...result.tables, ...leg.tables],
@@ -108,7 +111,7 @@ function predToSQL(node: PredicateNode): SQLParts {
     }
 
     case 'OR': {
-      const legs = node.args.map(arg => wrapS(predToSQL(arg)));
+      const legs = node.args.map(arg => wrapS(predToSQLParts(arg)));
       return legs.reduce((result, leg) => ({
         fields: [...result.fields, ...leg.fields],
         tables: [...result.tables, ...leg.tables],
@@ -117,7 +120,7 @@ function predToSQL(node: PredicateNode): SQLParts {
     }
 
     case 'NOT': {
-      const result = predToSQL(node.predicate);
+      const result = predToSQLParts(node.predicate);
       return {
         ...result,
         condition: `NOT (${result.condition})`,
@@ -125,12 +128,12 @@ function predToSQL(node: PredicateNode): SQLParts {
     }
 
     // case 'ForAll':
-    //   return `SELECT * FROM ${predToSQL(node.set)} ${predToSQL(
+    //   return `SELECT * FROM ${predToSQLParts(node.set)} ${predToSQLParts(
     //     node.variable,
-    //   )} WHERE ${predToSQL(node.predicate)}`;
+    //   )} WHERE ${predToSQLParts(node.predicate)}`;
 
     case 'Exists':
-      const result = predToSQL(node.predicate);
+      const result = predToSQLParts(node.predicate);
       return {
         fields: [
           // Add PKs here
@@ -172,7 +175,7 @@ function uniq(items: Array<string>): Array<string> {
   return result;
 }
 
-function sqlToString(sql: SQLParts): string {
+function sqlToString(sql: SQLParts, limit: number): string {
   return lines([
     'SELECT',
     indent(
@@ -188,20 +191,20 @@ function sqlToString(sql: SQLParts): string {
     ),
     'WHERE',
     indent(2, sql.condition),
-    'LIMIT 1',
+    `LIMIT ${limit}`,
   ]);
 }
 
 export function executeRule(rule: RuleNode): string {
-  let findCounterExample = false;
+  let counterExampleMode = rule.predicate.kind === 'ForAll';
 
   const execNode = simplifyPredicate(
-    rule.predicate.kind === 'ForAll' ? ast.NOT(rule.predicate) : rule.predicate,
+    counterExampleMode ? ast.NOT(rule.predicate) : rule.predicate,
   );
 
   return lines([
-    `-- ${findCounterExample ? `[counter example] ${rule.name}` : rule.name}`,
-    sqlToString(predToSQL(execNode)),
+    `-- ${counterExampleMode ? `[counter example] ${rule.name}` : rule.name}`,
+    sqlToString(predToSQLParts(execNode), counterExampleMode ? 10 + 1 : 1),
   ]);
 }
 
