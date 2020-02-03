@@ -111,22 +111,24 @@ function isCompatible(type1: TypeInfo, type2: TypeInfo): boolean {
   return false;
 }
 
-function check(node: Node, stack: Stack): [Node, TypeInfo] {
+function check(node: Node, stack: Stack): TypeInfo {
   switch (node.kind) {
     case 'Document': {
-      node.rules.map(node => check(node, stack));
-      return [node, t.Empty()];
+      node.rules.forEach(node => {
+        check(node, stack);
+      });
+      return t.Empty();
     }
 
     case 'Rule': {
-      const [, pred_t] = check(node.predicate, stack);
+      const pred_t = check(node.predicate, stack);
       if (pred_t.type !== 'Bool') {
         throw new TypeCheckError(
           `A predicate must be a Bool (but found ${pred_t.type})`,
           node.predicate.location,
         );
       }
-      return [node, t.Bool()];
+      return t.Bool();
     }
 
     case 'ForAll':
@@ -140,7 +142,7 @@ function check(node: Node, stack: Stack): [Node, TypeInfo] {
         throw new TypeCheckError(e.message, node.variable.location);
       }
 
-      const [, pred_t] = check(node.predicate, stack);
+      const pred_t = check(node.predicate, stack);
       if (pred_t.type !== 'Bool') {
         throw new TypeCheckError(
           `A predicate must be a Bool (but found ${pred_t.type})`,
@@ -150,27 +152,27 @@ function check(node: Node, stack: Stack): [Node, TypeInfo] {
 
       stack.pop();
 
-      return [node, t.Bool()];
+      return t.Bool();
     }
 
     case 'AND':
     case 'OR': {
-      for (const [arg, arg_t] of node.args.map(n => check(n, stack))) {
+      for (const arg_t of node.args.map(n => check(n, stack))) {
         invariant(arg_t.type === 'Bool', 'Expected a bool argument');
       }
-      return [node, t.Bool()];
+      return t.Bool();
     }
 
     case 'NOT': {
-      const [, pred_t] = check(node.predicate, stack);
+      const pred_t = check(node.predicate, stack);
       invariant(pred_t.type === 'Bool', 'Expected a bool argument to NOT');
-      return [node, t.Bool()];
+      return t.Bool();
     }
 
     case 'Equivalence':
     case 'Implication': {
-      const [left, left_t] = check(node.left, stack);
-      const [right, right_t] = check(node.right, stack);
+      const left_t = check(node.left, stack);
+      const right_t = check(node.right, stack);
       if (left_t.type !== 'Bool') {
         throw new TypeCheckError(
           'Expected left side to be boolean expression',
@@ -183,19 +185,19 @@ function check(node: Node, stack: Stack): [Node, TypeInfo] {
           node.right.location,
         );
       }
-      return [node, t.Bool()];
+      return t.Bool();
     }
 
     case 'Comparison': {
-      const [, left_t] = check(node.left, stack);
-      const [, right_t] = check(node.right, stack);
+      const left_t = check(node.left, stack);
+      const right_t = check(node.right, stack);
       if (!isCompatible(left_t, right_t)) {
         throw new TypeCheckError(
           `Left and right sides of ${node.op} must have the same type (${left_t.type} != ${right_t.type})`,
           node.location,
         );
       }
-      return [node, t.Bool()];
+      return t.Bool();
     }
 
     case 'Identifier': {
@@ -207,32 +209,32 @@ function check(node: Node, stack: Stack): [Node, TypeInfo] {
           node.location,
         );
       }
-      return [node, type];
+      return type;
     }
 
     case 'NumberLiteral': {
-      return [node, t.Int()];
+      return t.Int();
     }
 
     case 'StringLiteral': {
-      return [node, t.String()];
+      return t.String();
     }
 
     case 'BoolLiteral': {
-      return [node, t.Bool()];
+      return t.Bool();
     }
 
     case 'NullLiteral': {
-      return [node, t.Null()];
+      return t.Null();
     }
 
     case 'RelationSelection':
     case 'FieldSelection': {
-      const [, expr_t] = check(node.expr, stack);
+      const expr_t = check(node.expr, stack);
       if (expr_t.type === 'Record') {
         const type = expr_t.record[node.field.name];
         if (type !== undefined) {
-          return [node, type];
+          return type;
         }
       }
 
@@ -251,6 +253,6 @@ function check(node: Node, stack: Stack): [Node, TypeInfo] {
   }
 }
 
-export default function(node: Node): [Node, TypeInfo] {
+export default function(node: Node): TypeInfo {
   return check(node, new Stack());
 }

@@ -8,9 +8,7 @@ import type { TypeInfo } from '../types';
 
 function typeChecks(expr: string, expectedType: TypeInfo): void {
   const parsed = parsePredicate(expr);
-  const [checked, checked_t] = check(parsed);
-  expect(checked).toEqual(parsed); // type-checking does not change the parse tree
-  expect(checked_t).toEqual(expectedType); // but derives the correct type
+  expect(check(parsed)).toEqual(expectedType); // but derives the correct type
 }
 
 function doesNotTypeCheck(expr: string, msg?: string): void {
