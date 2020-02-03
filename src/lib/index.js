@@ -27,3 +27,15 @@ export function sumBy<T>(arr: Array<T>, keyFn: T => number): number {
 export function lines(lines: Array<?string>): string {
   return lines.filter(x => (x != null ? true : false)).join('\n');
 }
+
+export function uniq(items: Array<string>): Array<string> {
+  const seen = new Set();
+  const result = [];
+  for (const item of items) {
+    if (!seen.has(item)) {
+      seen.add(item);
+      result.push(item);
+    }
+  }
+  return result;
+}

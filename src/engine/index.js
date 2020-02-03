@@ -2,7 +2,7 @@
 
 import ast, { isLiteralNode, isExprNode } from '../ast';
 import invariant from 'invariant';
-import { lines } from '../lib';
+import { lines, indent, uniq } from '../lib';
 import { simplifyPredicate } from '../simplifier';
 import type {
   DocumentNode,
@@ -163,26 +163,6 @@ function predToSQLParts(node: PredicateNode): SQLParts {
         `Don't know how to convert nodes of ${node.kind} to SQL yet`,
       );
   }
-}
-
-// TODO: DRY THIS UP
-function indent(n: number, text: string): string {
-  return text
-    .split('\n')
-    .map(line => ' '.repeat(n) + line)
-    .join('\n');
-}
-
-function uniq(items: Array<string>): Array<string> {
-  const seen = new Set();
-  const result = [];
-  for (const item of items) {
-    if (!seen.has(item)) {
-      seen.add(item);
-      result.push(item);
-    }
-  }
-  return result;
 }
 
 function sqlToString(sql: SQLParts, limit?: number): string {
