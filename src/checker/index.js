@@ -34,7 +34,7 @@ const FakeRecordType = (alias: string) =>
       status: t.String(),
       isEnabled: t.Bool(),
       ndc: t.Int(),
-      isForPlaceboSkipping: t.Bool(),
+      is_for_placebo_skipping: t.Bool(),
     },
     alias,
   );
