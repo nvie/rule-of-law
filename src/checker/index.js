@@ -4,7 +4,6 @@ import fs from 'fs';
 import type { Location, Node, IdentifierNode } from '../ast';
 import type { TypeInfo } from '../types';
 import t from '../types';
-import invariant from 'invariant';
 
 export class TypeCheckError extends Error {
   location: Location | void;
@@ -38,6 +37,26 @@ const FakeRecordType = (alias: string) =>
     },
     alias,
   );
+
+function typeToString(type: TypeInfo): string {
+  if (type.alias !== undefined) {
+    return type.alias;
+  }
+
+  switch (type.type) {
+    case 'Record': {
+      return `{${Object.keys(type.record)
+        .map(key => `${key}: ${typeToString(type.record[key])}`)
+        .join(', ')}}`;
+    }
+
+    case 'Nullable':
+      return `${typeToString(type.ofType)}?`;
+
+    default:
+      return type.type;
+  }
+}
 
 type Scope = {|
   // All variables defined in this scope
@@ -96,11 +115,11 @@ function isCompatible(type1: TypeInfo, type2: TypeInfo): boolean {
   }
 
   if (
-    (type1.type === 'Null' && type2.type === 'Null') ||
     (type1.type === 'Nullable' && type2.type === 'Null') ||
-    (type2.type === 'Nullable' && type1.type === 'Null')
-  )
+    (type1.type === 'Null' && type2.type === 'Nullable')
+  ) {
     return true;
+  }
 
   if (type1.type === 'Nullable') {
     return isCompatible(type1.ofType, type2);
@@ -124,7 +143,7 @@ function check(node: Node, stack: Stack): TypeInfo {
       const pred_t = check(node.predicate, stack);
       if (pred_t.type !== 'Bool') {
         throw new TypeCheckError(
-          `A predicate must be a Bool (but found ${pred_t.type})`,
+          `Body of a rule must be Bool (but is ${typeToString(pred_t)})`,
           node.predicate.location,
         );
       }
@@ -145,7 +164,9 @@ function check(node: Node, stack: Stack): TypeInfo {
       const pred_t = check(node.predicate, stack);
       if (pred_t.type !== 'Bool') {
         throw new TypeCheckError(
-          `A predicate must be a Bool (but found ${pred_t.type})`,
+          `Body of ${node.kind.toLowerCase()} must be Bool (but is ${typeToString(
+            pred_t,
+          )})`,
           node.predicate.location,
         );
       }
@@ -157,15 +178,32 @@ function check(node: Node, stack: Stack): TypeInfo {
 
     case 'AND':
     case 'OR': {
-      for (const arg_t of node.args.map(n => check(n, stack))) {
-        invariant(arg_t.type === 'Bool', 'Expected a bool argument');
+      for (const argnode of node.args) {
+        const arg_t = check(argnode, stack);
+        if (arg_t.type !== 'Bool') {
+          throw new TypeCheckError(
+            `All arguments to ${
+              node.kind
+            } must be Bool (but found ${typeToString(arg_t)})`,
+            argnode.location,
+          );
+        }
       }
       return t.Bool();
     }
 
     case 'NOT': {
       const pred_t = check(node.predicate, stack);
-      invariant(pred_t.type === 'Bool', 'Expected a bool argument to NOT');
+
+      if (pred_t.type !== 'Bool') {
+        throw new TypeCheckError(
+          `All arguments to NOT must be Bool expression (but found ${typeToString(
+            pred_t,
+          )})`,
+          node.predicate.location,
+        );
+      }
+
       return t.Bool();
     }
 
@@ -193,7 +231,11 @@ function check(node: Node, stack: Stack): TypeInfo {
       const right_t = check(node.right, stack);
       if (!isCompatible(left_t, right_t)) {
         throw new TypeCheckError(
-          `Left and right sides of ${node.op} must have the same type (${left_t.type} != ${right_t.type})`,
+          `Left and right sides of ${
+            node.op
+          } must have the same type (${typeToString(left_t)} != ${typeToString(
+            right_t,
+          )})`,
           node.location,
         );
       }
