@@ -52,14 +52,14 @@ export function printFriendlyError(
             console.log(
               indent(
                 6 + start.column,
-                colors.red('^'.repeat(end.column - start.column - 1)),
+                colors.red('^'.repeat(end.column - start.column)),
               ),
             );
           } else if (lineno === start.line) {
             console.log(
               indent(
                 6 + start.column,
-                colors.red('^'.repeat(line.length - start.column + 1)),
+                colors.red('^'.repeat(line.length - (start.column - 1))),
               ),
             );
           } else if (lineno === end.line) {
