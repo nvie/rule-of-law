@@ -2,8 +2,10 @@
 
 import fs from 'fs';
 import type { Location, Node, IdentifierNode } from '../ast';
-import type { TypeInfo } from '../types';
+import type { TypeInfo, RecordTypeInfo } from '../types';
 import t from '../types';
+
+export type Schema = { [string]: RecordTypeInfo };
 
 export class TypeCheckError extends Error {
   location: Location | void;
@@ -37,6 +39,38 @@ const FakeRecordType = (alias: string) =>
     },
     alias,
   );
+
+function typeFromString(value: string): TypeInfo {
+  if (value.endsWith('?')) {
+    return t.Nullable(typeFromString(value.substring(0, value.length - 1)));
+  }
+
+  switch (value) {
+    case 'Int':
+      return t.Int();
+    case 'String':
+      return t.String();
+    case 'Bool':
+      return t.Bool();
+    default:
+      throw new Error(`Unknown type \`${value}\``);
+  }
+}
+
+export function typeFromJSON(value: mixed, alias?: string): TypeInfo {
+  if (typeof value === 'string') {
+    return typeFromString(value);
+  } else if (typeof value === 'object' && value != null) {
+    const rv = {};
+    for (const key of Object.keys(value)) {
+      const type = typeFromJSON(value[key], key);
+      rv[key] = type;
+    }
+    return t.Record(rv, alias ?? '?');
+  } else {
+    throw new Error(`Invalid schema, did not expect "${typeof value}"`);
+  }
+}
 
 function typeToString(type: TypeInfo): string {
   if (type.alias !== undefined) {
@@ -130,17 +164,17 @@ function isCompatible(type1: TypeInfo, type2: TypeInfo): boolean {
   return false;
 }
 
-function check(node: Node, stack: Stack): TypeInfo {
+function check(node: Node, schema: Schema, stack: Stack): TypeInfo {
   switch (node.kind) {
     case 'Document': {
       node.rules.forEach(node => {
-        check(node, stack);
+        check(node, schema, stack);
       });
       return t.Empty();
     }
 
     case 'Rule': {
-      const pred_t = check(node.predicate, stack);
+      const pred_t = check(node.predicate, schema, stack);
       if (pred_t.type !== 'Bool') {
         throw new TypeCheckError(
           `Body of a rule must be Bool (but is ${typeToString(pred_t)})`,
@@ -154,14 +188,22 @@ function check(node: Node, stack: Stack): TypeInfo {
     case 'Exists': {
       stack.push();
 
-      const fakeType = FakeRecordType(node.set.name); // TODO: Replace with a dynamic value
+      // Try looking up and registering the type (using the Schema)
+      const type = schema[node.set.name];
+      if (type === undefined) {
+        throw new TypeCheckError(
+          `Unknown set "${node.set.name}". Please define it in your schema.`,
+          node.set.location,
+        );
+      }
+
       try {
-        stack.setType(node.variable.name, fakeType);
+        stack.setType(node.variable.name, type);
       } catch (e) {
         throw new TypeCheckError(e.message, node.variable.location);
       }
 
-      const pred_t = check(node.predicate, stack);
+      const pred_t = check(node.predicate, schema, stack);
       if (pred_t.type !== 'Bool') {
         throw new TypeCheckError(
           `Body of ${node.kind.toLowerCase()} must be Bool (but is ${typeToString(
@@ -179,7 +221,7 @@ function check(node: Node, stack: Stack): TypeInfo {
     case 'AND':
     case 'OR': {
       for (const argnode of node.args) {
-        const arg_t = check(argnode, stack);
+        const arg_t = check(argnode, schema, stack);
         if (arg_t.type !== 'Bool') {
           throw new TypeCheckError(
             `All arguments to ${
@@ -193,7 +235,7 @@ function check(node: Node, stack: Stack): TypeInfo {
     }
 
     case 'NOT': {
-      const pred_t = check(node.predicate, stack);
+      const pred_t = check(node.predicate, schema, stack);
 
       if (pred_t.type !== 'Bool') {
         throw new TypeCheckError(
@@ -209,8 +251,8 @@ function check(node: Node, stack: Stack): TypeInfo {
 
     case 'Equivalence':
     case 'Implication': {
-      const left_t = check(node.left, stack);
-      const right_t = check(node.right, stack);
+      const left_t = check(node.left, schema, stack);
+      const right_t = check(node.right, schema, stack);
       if (left_t.type !== 'Bool') {
         throw new TypeCheckError(
           'Expected left side to be boolean expression',
@@ -227,8 +269,8 @@ function check(node: Node, stack: Stack): TypeInfo {
     }
 
     case 'Comparison': {
-      const left_t = check(node.left, stack);
-      const right_t = check(node.right, stack);
+      const left_t = check(node.left, schema, stack);
+      const right_t = check(node.right, schema, stack);
       if (!isCompatible(left_t, right_t)) {
         throw new TypeCheckError(
           `Left and right sides of ${
@@ -272,7 +314,7 @@ function check(node: Node, stack: Stack): TypeInfo {
 
     case 'RelationSelection':
     case 'FieldSelection': {
-      const expr_t = check(node.expr, stack);
+      const expr_t = check(node.expr, schema, stack);
       if (expr_t.type === 'Record') {
         const type = expr_t.record[node.field.name];
         if (type !== undefined) {
@@ -281,9 +323,7 @@ function check(node: Node, stack: Stack): TypeInfo {
       }
 
       throw new TypeCheckError(
-        `${expr_t.alias ?? expr_t.type} type has no field \`${
-          node.field.name
-        }\``,
+        `${typeToString(expr_t)} type has no field \`${node.field.name}\``,
         node.location,
       );
     }
@@ -295,6 +335,6 @@ function check(node: Node, stack: Stack): TypeInfo {
   }
 }
 
-export default function(node: Node): TypeInfo {
-  return check(node, new Stack());
+export default function(node: Node, schema: Schema): TypeInfo {
+  return check(node, schema, new Stack());
 }

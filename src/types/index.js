@@ -2,6 +2,12 @@
 
 import invariant from 'invariant';
 
+export type RecordTypeInfo = {|
+  type: 'Record',
+  alias?: string,
+  record: { [string]: TypeInfo }, // e.g. Order, Prescription, etc.
+|};
+
 export type TypeInfo =
   | {| type: 'Empty', alias?: string |}
   | {| type: 'String', alias?: string |}
@@ -9,12 +15,8 @@ export type TypeInfo =
   | {| type: 'Date', alias?: string |}
   | {| type: 'Bool', alias?: string |}
   | {| type: 'Null', alias?: string |}
-  | {|
-      type: 'Record',
-      alias?: string,
-      record: { [string]: TypeInfo }, // e.g. Order, Prescription, etc.
-    |}
-  | {| type: 'Nullable', alias?: string, ofType: TypeInfo |};
+  | {| type: 'Nullable', alias?: string, ofType: TypeInfo |}
+  | RecordTypeInfo;
 
 const Empty = (): TypeInfo => ({ type: 'Empty' });
 
@@ -28,7 +30,10 @@ const Bool = (): TypeInfo => ({ type: 'Bool' });
 
 const Null = (): TypeInfo => ({ type: 'Null' });
 
-const Record = (record: { [string]: TypeInfo }, alias: string): TypeInfo => ({
+const Record = (
+  record: { [string]: TypeInfo },
+  alias: string,
+): RecordTypeInfo => ({
   type: 'Record',
   alias,
   record,
