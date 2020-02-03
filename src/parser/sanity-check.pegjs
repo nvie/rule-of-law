@@ -23,20 +23,20 @@ Document
 
 
 Rule
-  = RULE name:StringLiteral predicate:Predicate
+  = RULE name:StringLiteral predicate:Predicate _
     { return ast.Rule(name.value, predicate, loc()) }
 
 
 Identifier "identifier"
-  = name:$( [A-Za-z_][A-Za-z0-9_]* ) _
+  = name:$( [A-Za-z_][A-Za-z0-9_]* )
     { return ast.Identifier(name, loc()) }
 
 
 Predicate
-  = FORALL set:Identifier variable:Identifier COLON predicate:Predicate
+  = FORALL set:Identifier _ variable:Identifier COLON predicate:Predicate
     { return ast.ForAll(set, variable, predicate, loc()) }
 
-  / EXISTS set:Identifier variable:Identifier COLON predicate:Predicate
+  / EXISTS set:Identifier _ variable:Identifier COLON predicate:Predicate
     { return ast.Exists(set, variable, predicate, loc()) }
 
   / Pred2
@@ -135,12 +135,12 @@ BoolLiteral
 
 
 NumberLiteral
-  = value:$( [-]?[0-9]+([.][0-9]*)? ) _
+  = value:$( [-]?[0-9]+([.][0-9]*)? )
     { return ast.NumberLiteral(parseFloat(value), loc()) }
 
 
 StringLiteral
-  = rawValue:$( ["] ( ([\\].) / [^"\n] )* ["] ) _
+  = rawValue:$( ["] ( ([\\].) / [^"\n] )* ["] )
     {
       const value = unescape(rawValue
         .substring(1, rawValue.length - 1))  // strip off quotes
