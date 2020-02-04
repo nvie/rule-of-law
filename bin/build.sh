@@ -15,7 +15,7 @@ clean() {
 }
 
 build_code() {
-    pegjs --allowed-start-rules Document,Rule,Predicate --cache -o src/parser/generated-parser.js src/parser/language.pegjs
+    bin/build-parser.sh
     babel -d "$DIST" "$SRC" --ignore '**/*.test.js'
 }
 
