@@ -1,11 +1,10 @@
 // @flow strict
 
 import fs from 'fs';
-import type { Location, Node, IdentifierNode } from '../ast';
-import type { TypeInfo, RecordTypeInfo } from '../types';
+import type { DocumentNode, IdentifierNode, Location, Node } from '../ast';
+import type { Schema, TypeInfo, RecordTypeInfo } from '../types';
 import t from '../types';
-
-export type Schema = { [string]: RecordTypeInfo };
+import { printFriendlyError } from '../parser';
 
 export class TypeCheckError extends Error {
   location: Location | void;
@@ -335,6 +334,22 @@ function check(node: Node, schema: Schema, stack: Stack): TypeInfo {
   }
 }
 
-export default function(node: Node, schema: Schema): TypeInfo {
-  return check(node, schema, new Stack());
+export default function(
+  doc: DocumentNode,
+  schema: Schema,
+  inputString: string,
+): TypeInfo {
+  try {
+    return check(doc, schema, new Stack());
+  } catch (e) {
+    /**
+     * If this is a type check error, report this in a visually pleasing
+     * manner in the console.
+     */
+    if (e instanceof TypeCheckError) {
+      printFriendlyError(e, inputString, 'Type error');
+      process.exit(2);
+    }
+    throw e;
+  }
 }

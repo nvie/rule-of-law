@@ -69,6 +69,26 @@ export default function format(node: Node): string {
     case 'NOT':
       return `not ${wrap(node.predicate, node)}`;
 
+    case 'Implication': {
+      const legs = [wrap(node.left, node), wrap(node.right, node)];
+      const multi = legs.some(
+        t => t.includes('\n') || sumBy(legs, t => t.length) > WRAP_WIDTH,
+      );
+      return multi
+        ? lines([`${legs[0]} =>`, indent(2, legs[1])])
+        : `${legs[0]} => ${legs[1]}`;
+    }
+
+    case 'Equivalence': {
+      const legs = [wrap(node.left, node), wrap(node.right, node)];
+      const multi = legs.some(
+        t => t.includes('\n') || sumBy(legs, t => t.length) > WRAP_WIDTH,
+      );
+      return multi
+        ? lines([`${legs[0]} <=>`, indent(2, legs[1])])
+        : `${legs[0]} <=> ${legs[1]}`;
+    }
+
     case 'Comparison':
       return `${format(node.left)} ${node.op} ${format(node.right)}`;
 

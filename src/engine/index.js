@@ -4,6 +4,7 @@ import ast, { isLiteralNode, isExprNode } from '../ast';
 import invariant from 'invariant';
 import { lines, indent, uniq } from '../lib';
 import { simplifyPredicate } from '../simplifier';
+import format from '../formatter';
 import type {
   DocumentNode,
   ExprNode,
@@ -11,6 +12,7 @@ import type {
   Node,
   PredicateNode,
   RuleNode,
+  Location,
 } from '../ast';
 
 type Alias = {|
@@ -22,6 +24,14 @@ type SQLParts = {|
   fields: Array<string>,
   tables: Array<Alias>,
   condition: string,
+|};
+
+export type RuleOutput = {|
+  rule: string,
+  body: string,
+  counterExample: boolean,
+  sql: string,
+  location: Location,
 |};
 
 function wrap(s: string): string {
@@ -147,8 +157,6 @@ function predToSQLParts(node: PredicateNode): SQLParts {
       return {
         fields: [
           // Add PKs here
-          // TODO: Don't hard-code `id` eventually, but for now this is fine
-          node.variable.name + '.id',
           ...result.fields,
         ],
         tables: [
@@ -185,22 +193,45 @@ function sqlToString(sql: SQLParts, limit?: number): string {
   ]);
 }
 
-export function executeRule(rule: RuleNode): string {
+/**
+ * Generates SQL for the given rule, but leaves execution of the SQL up to the
+ * caller (since there can be many DBs, or execution preferences).
+ *
+ * The `limit` argument dictates how many counter examples will be produced
+ * maximally.  Setting limit = null means explicitly no limit.
+ */
+export function executeRule(rule: RuleNode, limit: number | null): RuleOutput {
   let counterExampleMode = rule.predicate.kind === 'ForAll';
 
   const execNode = simplifyPredicate(
     counterExampleMode ? ast.NOT(rule.predicate) : rule.predicate,
   );
 
-  return lines([
+  const sql = lines([
     `-- ${rule.name}`,
     counterExampleMode
       ? `-- The following query will select all COUNTER EXAMPLES`
       : null,
-    sqlToString(predToSQLParts(execNode), counterExampleMode ? undefined : 1),
+    sqlToString(
+      predToSQLParts(execNode),
+      counterExampleMode ? limit ?? undefined : 1,
+    ),
   ]);
+
+  const location = rule.location;
+  invariant(location, 'Expected a location');
+  return {
+    rule: rule.name,
+    body: format(rule.predicate),
+    counterExample: counterExampleMode,
+    sql,
+    location,
+  };
 }
 
-export default function executeDocument(document: DocumentNode): string {
-  return document.rules.map(rule => executeRule(rule)).join('\n\n');
+export default function executeDocument(
+  document: DocumentNode,
+  limit: number | null,
+): Array<RuleOutput> {
+  return document.rules.map(rule => executeRule(rule, limit));
 }

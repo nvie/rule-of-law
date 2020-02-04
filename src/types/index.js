@@ -2,6 +2,8 @@
 
 import invariant from 'invariant';
 
+export type Schema = { [string]: RecordTypeInfo };
+
 export type RecordTypeInfo = {|
   type: 'Record',
   alias?: string,
