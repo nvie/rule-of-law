@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "actually-prepublish": "echo \"\\n\\nPlease run \\`bin/publish.sh <options>\\` instead.\\n\\n\" && exit 2",
-    "build:dist": "bin/build.sh",
+    "build:dist": "echo | bin/build.sh",
     "build:parser": "bin/build-parser.sh",
     "test": "flow --include-warnings && jest src",
     "prepublish": "in-publish && yarn run actually-prepublish || not-in-publish"
