@@ -6,13 +6,44 @@ import check from './index';
 import t from '../types';
 import type { TypeInfo } from '../types';
 
+const schema = {
+  Foo: {
+    type: 'Record',
+    alias: 'Foo',
+    record: {
+      isEnabled: { type: 'Bool' },
+    },
+  },
+  Bar: {
+    type: 'Record',
+    alias: 'Bar',
+    record: {
+      isEnabled: { type: 'Bool' },
+    },
+  },
+  Test: {
+    type: 'Record',
+    alias: 'Test',
+    record: {
+      id: { type: 'Int' },
+      isEnabled: { type: 'Bool' },
+    },
+  },
+};
+
+export type RecordTypeInfo = {|
+  type: 'Record',
+  alias?: string,
+  record: { [string]: TypeInfo }, // e.g. Order, Prescription, etc.
+|};
+
 function typeChecks(expr: string, expectedType: TypeInfo): void {
   const parsed = parsePredicate(expr);
-  expect(check(parsed)).toEqual(expectedType); // but derives the correct type
+  expect(check(parsed, schema, '')).toEqual(expectedType); // but derives the correct type
 }
 
 function doesNotTypeCheck(expr: string, msg?: string): void {
-  expect(() => check(parsePredicate(expr))).toThrow(msg);
+  expect(() => check(parsePredicate(expr), schema, '')).toThrow(msg);
 }
 
 describe('checker', () => {

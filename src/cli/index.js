@@ -28,7 +28,7 @@ function runWithOptions(options: Options, args: Array<string>) {
   const doc = parseDocument(inputString);
   check(doc, schema, inputString);
 
-  const rules = executeRules(doc);
+  const rules = executeRules(doc, 3);
   for (const rule of rules) {
     console.log('');
     console.log('');
@@ -50,11 +50,9 @@ async function main() {
     )
     .parse(process.argv);
 
-  // $FlowFixMe - options monkey-patched on program are invisible to Flow
   if (program.args.length < 1) {
     program.help();
   } else {
-    // $FlowFixMe - options monkey-patched on program are invisible to Flow
     const { verbose, schema } = program;
     const options = { verbose, schemaFile: schema };
     runWithOptions(options, program.args);

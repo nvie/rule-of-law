@@ -335,20 +335,22 @@ function check(node: Node, schema: Schema, stack: Stack): TypeInfo {
 }
 
 export default function(
-  doc: DocumentNode,
+  node: Node,
   schema: Schema,
   inputString: string,
 ): TypeInfo {
   try {
-    return check(doc, schema, new Stack());
+    return check(node, schema, new Stack());
   } catch (e) {
     /**
      * If this is a type check error, report this in a visually pleasing
      * manner in the console.
      */
     if (e instanceof TypeCheckError) {
-      printFriendlyError(e, inputString, 'Type error');
-      process.exit(2);
+      if (process.env.NODE_ENV !== 'test') {
+        printFriendlyError(e, inputString, 'Type error');
+        process.exit(2);
+      }
     }
     throw e;
   }
