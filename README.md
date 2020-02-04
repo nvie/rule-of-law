@@ -1,12 +1,12 @@
-[![Build Status](https://github.com/nvie/sanity-check/workflows/test/badge.svg)](https://github.com/nvie/sanity-check/actions)
+[![Build Status](https://github.com/nvie/rule-of-law/workflows/test/badge.svg)](https://github.com/nvie/rule-of-law/actions)
 
-# sanity-check
+# Rule of Law
 
-Sanity-check is a logical predicate language and a tool that allows you to
+Rule of Law is a logical predicate language and a tool that allows you to
 verify assumptions about data and relationships in your database that are
 otherwise hard to check or enforce.
 
-Think of sanity-check as a last line of defense, to provide a safety-net for
+Think of Rule of Law as a last line of defense, to provide a safety-net for
 cases that normal database constaints cannot cover.
 
 

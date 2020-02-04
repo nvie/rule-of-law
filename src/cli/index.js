@@ -39,7 +39,7 @@ function runWithOptions(options: Options, args: Array<string>) {
 
 async function main() {
   const program = commander
-    .name('sanity-check')
+    .name('rule-of-law')
     .version('0.0.1')
     .usage('[options] <path> [<path> ...]')
     .description('TODO')

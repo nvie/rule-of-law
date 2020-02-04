@@ -1,10 +1,10 @@
 {
-  "name": "@simple-contacts/sanity-check",
+  "name": "rule-of-law",
   "version": "0.0.1",
   "main": "dist/index.js",
   "license": "MIT",
   "bin": {
-    "sanity-check": "dist/cli/sanity-check.js"
+    "rule-of-law": "dist/cli/index.js"
   },
   "files": [
     "dist/"
@@ -12,7 +12,7 @@
   "scripts": {
     "build": "yarn run build:clean && yarn run build:parser && yarn run build:dist && yarn run build:flow",
     "build:clean": "rimraf dist",
-    "build:parser": "pegjs --allowed-start-rules Document,Rule,Predicate --cache -o src/parser/generated-parser.js src/parser/sanity-check.pegjs",
+    "build:parser": "pegjs --allowed-start-rules Document,Rule,Predicate --cache -o src/parser/generated-parser.js src/parser/language.pegjs",
     "build:flow": "flow-copy-source -v -i '**/__tests__/**' -i '**/*.test.*' src dist",
     "build:dist": "babel -d dist src --ignore '**/__tests__/**' --ignore '**/*.test.*'",
     "test": "yarn run -s flow && jest src",
@@ -20,10 +20,10 @@
     "prepublish": "in-publish && yarn run actually-prepublish || not-in-publish",
     "actually-prepublish": "yarn run build && yarn run test && yarn run build"
   },
-  "homepage": "https://github.com/SimpleContacts/sanity-check",
+  "homepage": "https://github.com/SimpleContacts/rule-of-law",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SimpleContacts/sanity-check"
+    "url": "git+https://github.com/SimpleContacts/rule-of-law"
   },
   "jest": {
     "moduleFileExtensions": [
