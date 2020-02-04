@@ -2,6 +2,7 @@
   "name": "rule-of-law",
   "version": "0.0.1",
   "main": "dist/index.js",
+  "author": "Vincent Driessen",
   "license": "MIT",
   "bin": {
     "rule-of-law": "dist/cli/index.js"
@@ -23,7 +24,7 @@
   "homepage": "https://github.com/SimpleContacts/rule-of-law",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SimpleContacts/rule-of-law"
+    "url": "git+https://github.com/SimpleContacts/rule-of-law.git"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -53,5 +54,9 @@
     "colors": "^1.4.0",
     "commander": "^4.1.0",
     "invariant": "^2.2.4"
+  },
+  "description": "[![Build Status](https://github.com/nvie/rule-of-law/workflows/test/badge.svg)](https://github.com/nvie/rule-of-law/actions)",
+  "bugs": {
+    "url": "https://github.com/SimpleContacts/rule-of-law/issues"
   }
 }
