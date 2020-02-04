@@ -16,7 +16,7 @@ clean() {
 
 build_code() {
     pegjs --allowed-start-rules Document,Rule,Predicate --cache -o src/parser/generated-parser.js src/parser/language.pegjs
-    babel -d "$DIST" "$SRC" --ignore '**/__tests__/**' --ignore '**/*.test.*'
+    babel -d "$DIST" "$SRC" --ignore '**/*.test.js'
 }
 
 copy_typescript_defs() {
@@ -27,7 +27,7 @@ copy_typescript_defs() {
 }
 
 copy_flow_defs() {
-    flow-copy-source -v -i '**/__tests__/**' -i '**/types/**' "$SRC" "$DIST"
+    flow-copy-source -v -i '**/*.test.js' -i '**/types/**' "$SRC" "$DIST"
 }
 
 copy_metadata() {
