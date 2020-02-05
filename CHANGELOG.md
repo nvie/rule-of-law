@@ -1,3 +1,7 @@
+# 0.0.3
+
+* Expose API to dump ROL schemas
+
 # 0.0.2
 
 * Fix missing Flow types in `types/` dir
