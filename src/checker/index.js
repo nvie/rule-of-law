@@ -15,30 +15,6 @@ export class TypeCheckError extends Error {
   }
 }
 
-// Some hacks to fake that we already have an external oracle for telling us
-// named types
-// TODO: Obviously replace this with the real thing later
-const FakeRecordType = (alias: string) =>
-  t.Record(
-    {
-      id: t.Int(),
-      str: t.String(),
-      dateCompleted: t.Nullable(t.Date()),
-      date_completed: t.Nullable(t.Date()),
-      preferred_generic_product_id: t.Nullable(t.Int()),
-      equivalent_primary_product_id: t.Nullable(t.Int()),
-      maybeStr: t.Nullable(t.String()),
-      maybeInt: t.Nullable(t.Int()),
-      maybeBool: t.Nullable(t.Bool()),
-      orderNo: t.String(),
-      status: t.String(),
-      isEnabled: t.Bool(),
-      ndc: t.Int(),
-      is_for_placebo_skipping: t.Bool(),
-    },
-    alias,
-  );
-
 function typeFromString(value: string): TypeInfo {
   if (value.endsWith('?')) {
     return t.Nullable(typeFromString(value.substring(0, value.length - 1)));
