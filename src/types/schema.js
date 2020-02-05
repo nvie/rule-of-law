@@ -2,9 +2,18 @@
 
 import type { Schema } from './index';
 import invariant from 'invariant';
-import { typeFromJSON } from '../checker';
+import { typeFromJSON, typeToString } from '../checker';
 
-export default function readSchema(schemaString: string): Schema {
+export function dumpSchema(schema: Schema): string {
+  const pairs = [];
+  for (const key of Object.keys(schema)) {
+    const record = schema[key];
+    pairs.push([key, typeToString(record)]);
+  }
+  return `{${pairs.map(([k, v]) => `${k}: ${v}`).join(',')}}`;
+}
+
+export function readSchema(schemaString: string): Schema {
   const blob = JSON.parse(schemaString);
   invariant(
     typeof blob === 'object' && blob != null,

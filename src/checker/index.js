@@ -71,7 +71,7 @@ export function typeFromJSON(value: mixed, alias?: string): TypeInfo {
   }
 }
 
-function typeToString(type: TypeInfo): string {
+export function typeToString(type: TypeInfo): string {
   if (type.alias !== undefined) {
     return type.alias;
   }

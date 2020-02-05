@@ -3,7 +3,7 @@
 import check from './checker';
 import executeRules from './engine';
 import fs from 'fs';
-import readSchema from './types/schema';
+import { readSchema , dumpSchema } from './types/schema';
 import util from 'util';
 import { parseDocument } from './parser';
 import type { RuleOutput } from './engine';
