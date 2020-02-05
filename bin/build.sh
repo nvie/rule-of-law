@@ -27,7 +27,7 @@ copy_typescript_defs() {
 }
 
 copy_flow_defs() {
-    flow-copy-source -v -i '**/*.test.js' -i '**/types/**' "$SRC" "$DIST"
+    flow-copy-source -v -i '**/*.test.js' "$SRC" "$DIST"
 }
 
 copy_metadata() {
