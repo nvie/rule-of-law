@@ -16,7 +16,7 @@ Here's an example:
 
 ```
 rule "All completed orders must have a completion date"
-forall Order o:
+forall orders o:
   o.status = "COMPLETE" => o.date_completed != NULL
 ```
 
@@ -29,7 +29,7 @@ that _if_ it has a completion date, _then_ it must also be in COMPLETE status":
 
 ```
 rule "All orders with a completion date must be complete"
-forall Order o:
+forall orders o:
   o.date_completed != NULL => o.status = "COMPLETE"
 ```
 
@@ -38,25 +38,8 @@ rule with an equivalence relation:
 
 ```
 rule "All completed orders have a completion date, and all others do not"
-forall Order o:
+forall orders o:
   o.date_completed != NULL <=> o.status = "COMPLETE"
-```
-
-
-## Multi-table relationships
-
-Other examples that are notoriously hard to capture with constraints are
-cross-table rules.  Oftentimes in practice it's very useful to denormalize your
-data to have all data conveniently available on tables where you need them,
-even though it means having multiple sources of truth, with the risk of those
-getting out of sync.
-
-Here's an example that ensures this will not happen:
-
-```
-rule "All order's prescriptions belong to the same user"
-forall Order o:
-  o.prescription != NULL => o.prescription.user = o.user
 ```
 
 
