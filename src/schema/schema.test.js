@@ -20,6 +20,8 @@ describe('schema', () => {
         "things": {
           "id": "Int?",
           "name": "String",
+          "date_created": "Date",
+          "date_closed": "Date?",
           "is_enabled": "Bool",
           "status": "String?"
         },

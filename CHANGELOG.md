@@ -1,3 +1,7 @@
+# 0.0.5
+
+* Support Dates in schema
+
 # 0.0.4
 
 * Expose parse/dump API for ROL schemas

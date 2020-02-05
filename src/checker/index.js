@@ -27,6 +27,8 @@ function typeFromString(value: string): TypeInfo {
       return t.String();
     case 'Bool':
       return t.Bool();
+    case 'Date':
+      return t.Date();
     default:
       throw new Error(`Unknown type \`${value}\``);
   }

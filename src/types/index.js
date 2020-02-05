@@ -47,9 +47,9 @@ const Nullable = (ofType: TypeInfo, alias?: string): TypeInfo => {
 
 export default {
   Bool,
-  Date,
   Empty,
   Int,
+  Date,
   Null,
   Nullable,
   Record,

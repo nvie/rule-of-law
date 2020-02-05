@@ -20,6 +20,9 @@ function dumpTypeInfo(info: TypeInfo): mixed {
       return value + '?';
     }
 
+    case 'Date':
+      return 'Date';
+
     case 'Int':
       return 'Int';
 
