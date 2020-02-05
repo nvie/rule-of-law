@@ -8,7 +8,7 @@ import colors from 'colors';
 import simplify from '../simplifier';
 import formatter from '../formatter';
 import executeRules from '../engine';
-import { readSchema } from '../types/schema';
+import { parseSchema } from '../schema';
 import invariant from 'invariant';
 import { parseDocument, printFriendlyError } from '../parser';
 import type { DocumentNode } from '../ast';
@@ -20,7 +20,7 @@ type Options = {|
 |};
 
 function runWithOptions(options: Options, args: Array<string>) {
-  const schema = readSchema(fs.readFileSync(options.schemaFile, 'utf-8'));
+  const schema = parseSchema(fs.readFileSync(options.schemaFile, 'utf-8'));
 
   const [inputFile] = args;
   const inputString = fs.readFileSync(inputFile, 'utf-8');

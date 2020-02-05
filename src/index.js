@@ -3,7 +3,7 @@
 import check from './checker';
 import executeRules from './engine';
 import fs from 'fs';
-import { readSchema , dumpSchema } from './types/schema';
+import { parseSchema } from './schema';
 import util from 'util';
 import { parseDocument } from './parser';
 import type { RuleOutput } from './engine';
@@ -14,6 +14,7 @@ export type RuleInfo = {|
 |};
 
 export { indent } from './lib';
+export { parseSchema, dumpSchema } from './schema';
 
 const readFile = util.promisify(fs.readFile);
 
@@ -25,7 +26,7 @@ export default async function* iterAll(
   const schemaContentsPromise = readFile(schemaFile, 'utf-8');
   const openFiles = files.map(f => [f, readFile(f, 'utf-8')]);
 
-  const schema = readSchema(await schemaContentsPromise);
+  const schema = parseSchema(await schemaContentsPromise);
   for (const [filename, openFilePromise] of openFiles) {
     const inputString = await openFilePromise;
 

@@ -1,3 +1,7 @@
+# 0.0.4
+
+* Expose parse/dump API for ROL schemas
+
 # 0.0.3
 
 * Expose API to dump ROL schemas
