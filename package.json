@@ -17,10 +17,11 @@
     "test": "flow --include-warnings && jest src",
     "prepublish": "in-publish && yarn run actually-prepublish || not-in-publish"
   },
-  "homepage": "https://github.com/SimpleContacts/rule-of-law",
+  "homepage": "https://github.com/nvie/rule-of-law",
+  "githubUrl": "https://github.com/nvie/rule-of-law",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SimpleContacts/rule-of-law.git"
+    "url": "git+https://github.com/nvie/rule-of-law.git"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -53,6 +54,6 @@
   },
   "description": "[![Build Status](https://github.com/nvie/rule-of-law/workflows/test/badge.svg)](https://github.com/nvie/rule-of-law/actions)",
   "bugs": {
-    "url": "https://github.com/SimpleContacts/rule-of-law/issues"
+    "url": "https://github.com/nvie/rule-of-law/issues"
   }
 }
