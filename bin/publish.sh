@@ -50,4 +50,4 @@ cd "$DIST" && yarn publish --new-version "$VERSION" "$@"
 
 # Open browser tab to create new release
 open "${GITHUB_URL}/blob/v${VERSION}/CHANGELOG.md"
-open "${GITHUB_URL}/releases/new?tag=v${VERSION}&body=TODO%3A%20Copy%20release%20notes%20from%20CHANGELOG."
+open "${GITHUB_URL}/releases/new?tag=v${VERSION}&title=v${VERSION}&body=TODO%3A%20Copy%20release%20notes%20from%20CHANGELOG."
