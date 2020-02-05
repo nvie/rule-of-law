@@ -34,7 +34,7 @@ yarn run test
 VERSION="$(cat package.json | jq -r .version)"
 GITHUB_URL="$(cat package.json | jq -r .githubUrl)"
 
-if [ -z "$GITHUB_URL" ]; then
+if [ -z "$GITHUB_URL" -o "$GITHUB_URL" = "null" ]; then
     echo 'Please specify `githubUrl` in package.json.' >&2
     exit 5
 fi
