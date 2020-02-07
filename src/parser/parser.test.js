@@ -27,6 +27,33 @@ describe('empty document', () => {
   });
 });
 
+describe('comments', () => {
+  it('line comment', () => {
+    expect(
+      parseDocument(`
+      // this line will get ignored
+      rule
+        // another comment
+        "foo" /* a block comment will
+                 also get ignored */
+        forall foos f /* here as well */ : 1  // bla
+    `),
+    ).toEqual(
+      ast.Document([
+        ast.Rule(
+          'foo',
+          ast.ForAll(
+            ast.Identifier('foos'),
+            ast.Identifier('f'),
+            ast.NumberLiteral(1),
+          ),
+          { skip: false },
+        ),
+      ]),
+    );
+  });
+});
+
 describe('predicates', () => {
   it('identifier', () => {
     expect(parsePredicate('x')).toEqual(ast.Identifier('x'));

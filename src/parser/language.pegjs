@@ -154,13 +154,30 @@ _ ""
 
 
 Ignorable
-  // TODO Eventually support comments here too?
   = Whitespace
+    { return null }
+
+  / Comment
     { return null }
 
 
 Whitespace
   = $( [ \t\r\n]+ )
+
+
+Comment
+  = LineComment
+  / CommentBlock
+
+
+LineComment
+  = '//' text:$( [^\n] )* [\n]
+    { return null }
+
+
+CommentBlock
+  = '/*' text:$( !'*/' . )* '*/'
+    { return null }
 
 
 //

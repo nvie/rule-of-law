@@ -1,6 +1,7 @@
 # 0.0.6
 
 * Support `skip rule` syntax, to skip rule execution
+* Enable comment syntax
 
 # 0.0.5
 
