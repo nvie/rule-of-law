@@ -35,4 +35,24 @@ describe('schema', () => {
       JSON.parse(schema),
     );
   });
+
+  it('relationships', () => {
+    const schema = `
+      {
+        "orders": {
+          "id": "Int",
+          "user_id": "Int?",
+          "status": "String",
+          "user": "user_id -> users:id"
+        },
+        "users": {
+          "id": "Int",
+          "name": "String"
+        }
+      }
+    `;
+    expect(JSON.parse(dumpSchema(parseSchema(schema)))).toEqual(
+      JSON.parse(schema),
+    );
+  });
 });

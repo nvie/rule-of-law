@@ -32,6 +32,9 @@ function dumpTypeInfo(info: TypeInfo): mixed {
     case 'Bool':
       return 'Bool';
 
+    case 'Relation':
+      return `${info.srcField} -> ${info.dst}:${info.dstField}`;
+
     default:
       throw new Error(`Don't know how to dump type info for ${info.type}`);
   }

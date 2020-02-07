@@ -10,6 +10,13 @@ export type RecordTypeInfo = {|
   record: { [string]: TypeInfo }, // e.g. Order, Prescription, etc.
 |};
 
+export type RelationTypeInfo = {|
+  type: 'Relation',
+  srcField: string,
+  dst: string,
+  dstField: string,
+|};
+
 export type TypeInfo =
   | {| type: 'Empty', alias?: string |}
   | {| type: 'String', alias?: string |}
@@ -18,7 +25,8 @@ export type TypeInfo =
   | {| type: 'Bool', alias?: string |}
   | {| type: 'Null', alias?: string |}
   | {| type: 'Nullable', alias?: string, ofType: TypeInfo |}
-  | RecordTypeInfo;
+  | RecordTypeInfo
+  | RelationTypeInfo;
 
 const Empty = (): TypeInfo => ({ type: 'Empty' });
 

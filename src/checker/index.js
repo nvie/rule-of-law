@@ -15,7 +15,22 @@ export class TypeCheckError extends Error {
   }
 }
 
+function typeFromRelationDef(value: string): TypeInfo {
+  const pattern = /^(\w+)\s*->\s*(\w+)\s*:\s*(\w+)$/;
+  const match = value.match(pattern);
+  if (!match) {
+    throw new Error('Invalid relation syntax');
+  }
+
+  const [, srcField, dst, dstField] = match;
+  return { type: 'Relation', srcField, dst, dstField };
+}
+
 function typeFromString(value: string): TypeInfo {
+  if (value.includes('->')) {
+    return typeFromRelationDef(value);
+  }
+
   if (value.endsWith('?')) {
     return t.Nullable(typeFromString(value.substring(0, value.length - 1)));
   }
