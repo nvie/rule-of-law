@@ -4,7 +4,7 @@ import invariant from 'invariant';
 import { parsePredicate } from '../parser';
 import check from './index';
 import t from '../types';
-import type { TypeInfo } from '../types';
+import type { TypeInfo, RecordTypeInfo } from '../types';
 
 const schema = {
   Foo: {
@@ -31,12 +31,6 @@ const schema = {
     },
   },
 };
-
-export type RecordTypeInfo = {|
-  type: 'Record',
-  alias?: string,
-  record: { [string]: TypeInfo }, // e.g. Order, Prescription, etc.
-|};
 
 function typeChecks(expr: string, expectedType: TypeInfo): void {
   const parsed = parsePredicate(expr);
