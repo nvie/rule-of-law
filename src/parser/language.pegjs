@@ -92,7 +92,7 @@ Pred7
 
 
 Expr
-  = leading:( Identifier ( DOT / ARROW ) )+ field:Identifier
+  = leading:( Identifier DOT )+ field:Identifier
     {
        function leftAssoc(exprs, rhs) {
          if (exprs.length === 0) {
@@ -100,13 +100,7 @@ Expr
          } else {
            const [expr, op] = exprs.pop()
            const lhs = leftAssoc(exprs, expr);
-           if (op === '.') {
-             return ast.FieldSelection(lhs, rhs, loc());
-           } else if (op === '->') {
-             return ast.RelationSelection(lhs, rhs, loc());
-           } else {
-             throw new Error('Unknown operation: ' + op);
-           }
+           return ast.FieldSelection(lhs, rhs, loc());
          }
        }
 
@@ -202,7 +196,6 @@ EOK "end of keyword"
 //
 // Punctuation
 //
-ARROW   = _ '->' _  { return '->' }
 COLON   = _ ':' _   { return ':' }
 DOT     = _ '.' _   { return '.' }
 EQ      = _ '=' _   { return '=' }

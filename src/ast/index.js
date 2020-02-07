@@ -61,14 +61,6 @@ export type FieldSelectionNode = {|
   level: 8,
 |};
 
-export type RelationSelectionNode = {|
-  kind: 'RelationSelection',
-  location?: Location,
-  expr: ExprNode,
-  field: IdentifierNode,
-  level: 8,
-|};
-
 export type ImplicationNode = {|
   kind: 'Implication',
   location?: Location,
@@ -119,7 +111,6 @@ export type PredicateNode =
 export type ExprNode =
   | ComparisonNode
   | FieldSelectionNode
-  | RelationSelectionNode
   | LiteralNode
   | IdentifierNode;
 
@@ -182,7 +173,6 @@ export function isExprNode(node: Node): boolean %checks {
   return (
     node.kind === 'Comparison' ||
     node.kind === 'FieldSelection' ||
-    node.kind === 'RelationSelection' ||
     node.kind === 'Identifier' ||
     isLiteralNode(node)
   );
@@ -353,18 +343,6 @@ const FieldSelection = (
   level: 8,
 });
 
-const RelationSelection = (
-  expr: ExprNode,
-  field: IdentifierNode,
-  location?: Location,
-): RelationSelectionNode => ({
-  kind: 'RelationSelection',
-  location,
-  expr,
-  field,
-  level: 8,
-});
-
 export default {
   AND,
   BoolLiteral,
@@ -379,7 +357,6 @@ export default {
   NOT,
   NullLiteral,
   NumberLiteral,
-  RelationSelection,
   OR,
   Rule,
   StringLiteral,

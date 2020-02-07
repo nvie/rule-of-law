@@ -300,7 +300,6 @@ function check(node: Node, schema: Schema, stack: Stack): TypeInfo {
       return t.Null();
     }
 
-    case 'RelationSelection':
     case 'FieldSelection': {
       const expr_t = check(node.expr, schema, stack);
       if (expr_t.type === 'Record') {

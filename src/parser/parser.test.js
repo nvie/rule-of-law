@@ -295,39 +295,6 @@ describe('expressions', () => {
       ),
     );
   });
-
-  it('relation following', () => {
-    expect(parsePredicate('x->y')).toEqual(
-      ast.RelationSelection(ast.Identifier('x'), ast.Identifier('y')),
-    );
-  });
-
-  it('relation following (nested)', () => {
-    expect(parsePredicate('p->q->r->s')).toEqual(
-      ast.RelationSelection(
-        ast.RelationSelection(
-          ast.RelationSelection(ast.Identifier('p'), ast.Identifier('q')),
-          ast.Identifier('r'),
-        ),
-        ast.Identifier('s'),
-      ),
-    );
-  });
-
-  it('equal precedence', () => {
-    expect(parsePredicate('p->q.r->s.t')).toEqual(
-      ast.FieldSelection(
-        ast.RelationSelection(
-          ast.FieldSelection(
-            ast.RelationSelection(ast.Identifier('p'), ast.Identifier('q')),
-            ast.Identifier('r'),
-          ),
-          ast.Identifier('s'),
-        ),
-        ast.Identifier('t'),
-      ),
-    );
-  });
 });
 
 describe('simple rule', () => {
