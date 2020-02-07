@@ -35,14 +35,15 @@ describe('schema', () => {
       JSON.parse(schema),
     );
   });
+});
 
-  it('relationships', () => {
+describe('relations', () => {
+  it('normal case', () => {
     const schema = `
       {
         "orders": {
           "id": "Int",
-          "user_id": "Int?",
-          "status": "String",
+          "user_id": "Int",
           "user": "user_id -> users:id"
         },
         "users": {
@@ -51,6 +52,73 @@ describe('schema', () => {
         }
       }
     `;
+    expect(JSON.parse(dumpSchema(parseSchema(schema)))).toEqual(
+      JSON.parse(schema),
+    );
+  });
+
+  it('relations (unknown src field)', () => {
+    const schema = `{
+      "orders": {
+        "user": "user_id -> users:id"
+      }
+    }`;
+    expect(() => parseSchema(schema)).toThrow(
+      'Unknown field `user_id` (in `orders.user` relation)',
+    );
+  });
+
+  it('relations (unknown dst type)', () => {
+    const schema = `{
+      "orders": {
+        "user_id": "Int",
+        "user": "user_id -> users:id"
+      }
+    }`;
+    expect(() => parseSchema(schema)).toThrow(
+      'Unknown type `users` (in `orders.user` relation)',
+    );
+  });
+
+  it('relations (unknown dst field)', () => {
+    const schema = `{
+      "orders": {
+        "user_id": "Int",
+        "user": "user_id -> users:id"
+      },
+      "users": {
+        "name": "String"
+      }
+    }`;
+    expect(() => parseSchema(schema)).toThrow(
+      'Unknown field `users:id` (in `orders.user` relation)',
+    );
+  });
+
+  it('relations (type mismatch)', () => {
+    const schema = `{
+      "orders": {
+        "user_id": "Int",
+        "user": "user_id -> users:id"
+      },
+      "users": {
+        "id": "String"
+      }
+    }`;
+    expect(() => parseSchema(schema)).toThrow(
+      'Type error: `user_id` (Int) incompatible with `users:id` (String)',
+    );
+  });
+
+  it('relations (self references)', () => {
+    const schema = `{
+      "users": {
+        "id": "Int",
+        "parent_id": "Int",
+        "parent": "parent_id -> users:id"
+      }
+    }`;
+
     expect(JSON.parse(dumpSchema(parseSchema(schema)))).toEqual(
       JSON.parse(schema),
     );

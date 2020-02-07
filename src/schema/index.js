@@ -2,7 +2,7 @@
 
 import type { TypeInfo, Schema } from '../types';
 import invariant from 'invariant';
-import { typeFromJSON } from '../checker';
+import { isCompatible, typeFromJSON, typeToString } from '../checker';
 
 function dumpTypeInfo(info: TypeInfo): mixed {
   switch (info.type) {
@@ -49,6 +49,60 @@ export function dumpSchema(schema: Schema): string {
   return JSON.stringify(pairs, null, 2);
 }
 
+/**
+ * Type checks the schema to see if all relationships are valid declarations.
+ */
+function checkSchema(schema: Schema) {
+  // Check all declared types
+  for (const key of Object.keys(schema)) {
+    const typeDef = schema[key];
+    const record = typeDef.record;
+
+    // Check each field within each type
+    for (const field of Object.keys(record)) {
+      const fieldType = record[field];
+      if (fieldType.type === 'Relation') {
+        const { srcField, dst, dstField } = fieldType;
+
+        // Check the source field exists
+        const srcFieldType = record[srcField];
+        if (srcFieldType === undefined) {
+          throw new Error(
+            `Unknown field \`${srcField}\` (in \`${key}.${field}\` relation)`,
+          );
+        }
+
+        // Check the destination type exists
+        const dstType = schema[dst] ? schema[dst].record : undefined;
+        if (dstType === undefined) {
+          throw new Error(
+            `Unknown type \`${dst}\` (in \`${key}.${field}\` relation)`,
+          );
+        }
+
+        // Check the destination field exists
+        const dstFieldType = dstType[dstField];
+        if (dstFieldType === undefined) {
+          throw new Error(
+            `Unknown field \`${dst}:${dstField}\` (in \`${key}.${field}\` relation)`,
+          );
+        }
+
+        // Check the source field and destination field types match
+        if (!isCompatible(srcFieldType, dstFieldType)) {
+          throw new Error(
+            `Type error: \`${srcField}\` (${typeToString(
+              srcFieldType,
+            )}) incompatible with \`${dst}:${dstField}\` (${typeToString(
+              dstFieldType,
+            )})`,
+          );
+        }
+      }
+    }
+  }
+}
+
 export function parseSchema(schemaString: string): Schema {
   const blob = JSON.parse(schemaString);
   invariant(
@@ -65,5 +119,8 @@ export function parseSchema(schemaString: string): Schema {
     );
     rv[key] = type;
   }
+
+  checkSchema(rv);
+
   return rv;
 }

@@ -136,7 +136,7 @@ function isPrimitive(type: TypeInfo): boolean %checks {
   );
 }
 
-function isCompatible(type1: TypeInfo, type2: TypeInfo): boolean {
+export function isCompatible(type1: TypeInfo, type2: TypeInfo): boolean {
   if (isPrimitive(type1) && isPrimitive(type2)) {
     return (
       type1.type === type2.type ||

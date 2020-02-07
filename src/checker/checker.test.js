@@ -2,35 +2,29 @@
 
 import invariant from 'invariant';
 import { parsePredicate } from '../parser';
+import { parseSchema } from '../schema';
 import check from './index';
 import t from '../types';
 import type { TypeInfo, RecordTypeInfo } from '../types';
 
-const schema = {
-  Foo: {
-    type: 'Record',
-    alias: 'Foo',
-    record: {
-      createdAt: { type: 'Date' },
-      isEnabled: { type: 'Bool' },
+const schema = parseSchema(`
+  {
+    "Foo": {
+      "createdAt": "Date",
+      "isEnabled": "Bool",
+      "bar_id": "Int",
+      "bar": "bar_id -> Bar:id"
     },
-  },
-  Bar: {
-    type: 'Record',
-    alias: 'Bar',
-    record: {
-      isEnabled: { type: 'Bool' },
+    "Bar": {
+      "id": "Int",
+      "isEnabled": "Bool"
     },
-  },
-  Test: {
-    type: 'Record',
-    alias: 'Test',
-    record: {
-      id: { type: 'Int' },
-      isEnabled: { type: 'Bool' },
-    },
-  },
-};
+    "Test": {
+      "id": "Int",
+      "isEnabled": "Bool"
+    }
+  }
+`);
 
 function typeChecks(expr: string, expectedType: TypeInfo): void {
   const parsed = parsePredicate(expr);
