@@ -167,7 +167,7 @@ function simplifyDocument(node: DocumentNode): DocumentNode {
 }
 
 function simplifyRule(node: RuleNode): RuleNode {
-  return ast.Rule(node.name, simplifyPredicate(node.predicate));
+  return ast.Rule(node.name, simplifyPredicate(node.predicate), node.flags);
 }
 
 export default function simplify(node: Node): Node {

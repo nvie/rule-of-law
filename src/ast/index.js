@@ -144,11 +144,16 @@ export type IdentifierNode = {|
   name: string,
 |};
 
+export type RuleFlags = {|
+  skip: boolean,
+|};
+
 export type RuleNode = {|
   kind: 'Rule',
   location?: Location,
   name: string,
   predicate: PredicateNode,
+  flags: RuleFlags,
 |};
 
 export type ComparisonNode = {|
@@ -195,12 +200,14 @@ export function isLiteralNode(node: Node): boolean %checks {
 const Rule = (
   name: string,
   predicate: PredicateNode,
+  flags: RuleFlags,
   location?: Location,
 ): RuleNode => ({
   kind: 'Rule',
   location,
   name,
   predicate,
+  flags,
 });
 
 const Identifier = (name: string, location?: Location): IdentifierNode => ({

@@ -54,7 +54,7 @@ Codifying these rules as logical statements serves multiple purposes:
    easy to find.
 4. Proactive monitoring.  Since these rules are self-validating, we can
    periodically run them as checks against real production data and alert as
-   soon as a counterexample is found.
+   soon as a counter example is found.
 5. Test cases.  By running the rules as part of the CI / testing phase, you can
    catch broken assumptions as they happen.
 6. Guide code reviews.  Because the rules are explicitly stored and versioned

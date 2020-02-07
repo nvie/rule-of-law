@@ -23,8 +23,8 @@ Document
 
 
 Rule
-  = RULE name:StringLiteral predicate:Predicate _
-    { return ast.Rule(name.value, predicate, loc()) }
+  = skip:SKIP? RULE name:StringLiteral predicate:Predicate _
+    { return ast.Rule(name.value, predicate, { skip: skip !== null }, loc()) }
 
 
 Identifier "identifier"
@@ -175,6 +175,7 @@ NOT    = _ 'not'     EOK
 NULL   = _ 'null'i   EOK
 TRUE   = _ 'true'    EOK
 FALSE  = _ 'false'   EOK
+SKIP   = _ 'skip'    EOK
 
 
 EOK "end of keyword"

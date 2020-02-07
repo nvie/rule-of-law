@@ -319,6 +319,27 @@ describe('simple rule', () => {
           ast.Identifier('o'),
           ast.Identifier('p'),
         ),
+        { skip: false },
+      ),
+    );
+  });
+
+  it('rule skipping', () => {
+    expect(
+      parseRule(`
+        skip rule "description goes here"
+          forall Order o:
+            p
+      `),
+    ).toEqual(
+      ast.Rule(
+        'description goes here',
+        ast.ForAll(
+          ast.Identifier('Order'),
+          ast.Identifier('o'),
+          ast.Identifier('p'),
+        ),
+        { skip: true },
       ),
     );
   });

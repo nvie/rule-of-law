@@ -26,10 +26,12 @@ type SQLParts = {|
   condition: string,
 |};
 
+export type ExecutionMode = 'FIND_EXAMPLE' | 'FIND_COUNTER_EXAMPLE' | 'SKIP';
+
 export type RuleOutput = {|
   rule: string,
   body: string,
-  counterExample: boolean,
+  mode: ExecutionMode,
   sql: string,
   location: Location,
 |};
@@ -201,29 +203,24 @@ function sqlToString(sql: SQLParts, limit?: number): string {
  * maximally.  Setting limit = null means explicitly no limit.
  */
 export function executeRule(rule: RuleNode, limit: number | null): RuleOutput {
-  let counterExampleMode = rule.predicate.kind === 'ForAll';
+  let mode =
+    rule.predicate.kind === 'ForAll' ? 'FIND_COUNTER_EXAMPLE' : 'FIND_EXAMPLE';
 
   const execNode = simplifyPredicate(
-    counterExampleMode ? ast.NOT(rule.predicate) : rule.predicate,
+    mode === 'FIND_COUNTER_EXAMPLE' ? ast.NOT(rule.predicate) : rule.predicate,
   );
 
-  const sql = lines([
-    `-- ${rule.name}`,
-    counterExampleMode
-      ? `-- The following query will select all COUNTER EXAMPLES`
-      : null,
-    sqlToString(
-      predToSQLParts(execNode),
-      counterExampleMode ? limit ?? undefined : 1,
-    ),
-  ]);
+  const sql = sqlToString(
+    predToSQLParts(execNode),
+    mode === 'FIND_COUNTER_EXAMPLE' ? limit ?? undefined : 1,
+  );
 
   const location = rule.location;
   invariant(location, 'Expected a location');
   return {
     rule: rule.name,
     body: format(rule.predicate),
-    counterExample: counterExampleMode,
+    mode: rule.flags.skip ? 'SKIP' : mode,
     sql,
     location,
   };

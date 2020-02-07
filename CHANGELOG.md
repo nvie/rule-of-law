@@ -1,3 +1,7 @@
+# 0.0.6
+
+* Support `skip rule` syntax, to skip rule execution
+
 # 0.0.5
 
 * Support Dates in schema
