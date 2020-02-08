@@ -6,6 +6,7 @@ import fs from 'fs';
 import { parseSchema } from './schema';
 import util from 'util';
 import { parseDocument } from './parser';
+import { expand } from './expander';
 import type { RuleOutput } from './engine';
 
 export type RuleInfo = {|
@@ -30,9 +31,16 @@ export default async function* iterAll(
   for (const [filename, openFilePromise] of openFiles) {
     const inputString = await openFilePromise;
 
-    const doc = parseDocument(inputString);
+    // Phase 0: parse
+    let doc = parseDocument(inputString);
+
+    // Phase 1: typecheck
     check(doc, schema, inputString);
 
+    // Phase 2: expand shorthand expressions
+    doc = expand(doc, schema);
+
+    // Phase 3: execute
     for (const rule of executeRules(doc, limit)) {
       yield {
         ...rule,
