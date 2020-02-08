@@ -343,7 +343,14 @@ function check(node: Node, schema: Schema, stack: Stack): TypeInfo {
     case 'MemberAccess': {
       const expr_t = check(node.target, schema, stack);
       if (expr_t.type === 'Record') {
-        const type = expr_t.record[node.field.name];
+        let type = expr_t.record[node.field.name];
+
+        if (type !== undefined && type.type === 'Relation') {
+          // If this field is a relation, then return the type it references
+          // from the schema instead
+          type = schema[type.dst];
+        }
+
         if (type !== undefined) {
           return type;
         }

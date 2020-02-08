@@ -10,18 +10,18 @@ import type { TypeInfo, RecordTypeInfo } from '../types';
 const schema = parseSchema(`
   {
     "Foo": {
-      "createdAt": "Date",
-      "isEnabled": "Bool",
+      "created_at": "Date",
+      "is_enabled": "Bool",
       "bar_id": "Int",
       "bar": "bar_id -> Bar:id"
     },
     "Bar": {
       "id": "Int",
-      "isEnabled": "Bool"
+      "is_enabled": "Bool"
     },
     "Test": {
       "id": "Int",
-      "isEnabled": "Bool"
+      "is_enabled": "Bool"
     }
   }
 `);
@@ -67,8 +67,9 @@ describe('checker', () => {
   });
 
   it('compare dates (with strings)', () => {
-    typeChecks('forall Foo f: f.createdAt != f.createdAt', t.Bool());
-    typeChecks('forall Foo f: f.createdAt >= "2020-01-01"', t.Bool());
+    typeChecks('forall Foo f: f.created_at != f.created_at', t.Bool());
+    typeChecks('forall Foo f: f.created_at >= "2020-01-01"', t.Bool());
+    typeChecks('forall Foo f: "2020-01-01" = f.created_at', t.Bool());
   });
 
   it('logic', () => {
@@ -77,7 +78,7 @@ describe('checker', () => {
 
   it('nested scope definitions', () => {
     typeChecks(
-      'forall Foo f: forall Bar b: f.isEnabled => b.isEnabled',
+      'forall Foo f: forall Bar b: f.is_enabled => b.is_enabled',
       t.Bool(),
     );
   });
@@ -91,14 +92,29 @@ describe('checker', () => {
 
   it('scopes work', () => {
     typeChecks(
-      '(forall Foo f: f.isEnabled) and (forall Foo f: f.isEnabled)',
+      '(forall Foo f: f.is_enabled) and (forall Foo f: f.is_enabled)',
       t.Bool(),
     );
 
     doesNotTypeCheck(
-      '(forall Foo f: f.isEnabled) and f and (forall Foo f: f.isEnabled)',
+      '(forall Foo f: f.is_enabled) and f and (forall Foo f: f.is_enabled)',
       'Unknown variable `f`',
     );
+  });
+
+  it('checks fields', () => {
+    typeChecks('forall Foo f: f.bar_id = 1', t.Bool());
+    typeChecks('forall Foo f: f.is_enabled', t.Bool());
+    doesNotTypeCheck('forall Foo f: f.baz', 'Foo type has no field `baz`');
+  });
+
+  it('relations following', () => {
+    typeChecks('forall Foo f: f.bar.is_enabled', t.Bool());
+    doesNotTypeCheck(
+      'forall Foo f: f.baz.is_enabled',
+      'Foo type has no field `baz`',
+    );
+    doesNotTypeCheck('forall Foo f: f.bar.baz', 'Bar type has no field `baz`');
   });
 });
 
