@@ -116,13 +116,24 @@ function isPrimitive(type: TypeInfo): boolean %checks {
     type.type === 'Int' ||
     type.type === 'String' ||
     type.type === 'Bool' ||
+    type.type === 'Date' ||
     type.type === 'Null'
   );
 }
 
 function isCompatible(type1: TypeInfo, type2: TypeInfo): boolean {
   if (isPrimitive(type1) && isPrimitive(type2)) {
-    return type1.type === type2.type;
+    return (
+      type1.type === type2.type ||
+      //
+      // Allow date fields to be compated with strings, to enable syntax like
+      // this:
+      //
+      //   foo.createdAt < "2020-01-01"
+      //
+      (type1.type === 'Date' && type2.type === 'String') ||
+      (type1.type === 'String' && type2.type === 'Date')
+    );
   }
 
   if (

@@ -11,6 +11,7 @@ const schema = {
     type: 'Record',
     alias: 'Foo',
     record: {
+      createdAt: { type: 'Date' },
       isEnabled: { type: 'Bool' },
     },
   },
@@ -60,10 +61,16 @@ describe('checker', () => {
     typeChecks('1=2', t.Bool());
     typeChecks('"hey" < "abc"', t.Bool());
     typeChecks('NULL != NULL', t.Bool());
+    typeChecks('"hey" < "abc"', t.Bool());
 
     doesNotTypeCheck('1 != NULL');
     doesNotTypeCheck('1 != "hey"');
     doesNotTypeCheck('NULL != "hey"');
+  });
+
+  it('compare dates (with strings)', () => {
+    typeChecks('forall Foo f: f.createdAt != f.createdAt', t.Bool());
+    typeChecks('forall Foo f: f.createdAt >= "2020-01-01"', t.Bool());
   });
 
   it('logic', () => {
