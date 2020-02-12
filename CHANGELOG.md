@@ -1,3 +1,8 @@
+# 0.0.7
+
+* Enable syntax to compare date fields against string literals, like
+  `foo.createdAt < "2020-01-01"`
+
 # 0.0.6
 
 * Support `skip rule` syntax, to skip rule execution
