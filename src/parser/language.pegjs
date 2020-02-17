@@ -100,7 +100,7 @@ Expr
          } else {
            const [expr, op] = exprs.pop()
            const lhs = leftAssoc(exprs, expr);
-           return ast.FieldSelection(lhs, rhs, loc());
+           return ast.MemberAccess(lhs, rhs, loc());
          }
        }
 

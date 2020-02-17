@@ -92,8 +92,8 @@ export default function format(node: Node): string {
     case 'Comparison':
       return `${format(node.left)} ${node.op} ${format(node.right)}`;
 
-    case 'FieldSelection':
-      return `${format(node.expr)}.${format(node.field)}`;
+    case 'MemberAccess':
+      return `${format(node.target)}.${format(node.field)}`;
 
     case 'Identifier':
       return node.name;

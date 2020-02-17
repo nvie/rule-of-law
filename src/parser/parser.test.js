@@ -278,17 +278,17 @@ describe('expressions', () => {
     );
   });
 
-  it('field selection', () => {
+  it('member access', () => {
     expect(parsePredicate('x.y')).toEqual(
-      ast.FieldSelection(ast.Identifier('x'), ast.Identifier('y')),
+      ast.MemberAccess(ast.Identifier('x'), ast.Identifier('y')),
     );
   });
 
   it('field selection (nested)', () => {
     expect(parsePredicate('p.q.r.s')).toEqual(
-      ast.FieldSelection(
-        ast.FieldSelection(
-          ast.FieldSelection(ast.Identifier('p'), ast.Identifier('q')),
+      ast.MemberAccess(
+        ast.MemberAccess(
+          ast.MemberAccess(ast.Identifier('p'), ast.Identifier('q')),
           ast.Identifier('r'),
         ),
         ast.Identifier('s'),

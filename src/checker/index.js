@@ -300,8 +300,8 @@ function check(node: Node, schema: Schema, stack: Stack): TypeInfo {
       return t.Null();
     }
 
-    case 'FieldSelection': {
-      const expr_t = check(node.expr, schema, stack);
+    case 'MemberAccess': {
+      const expr_t = check(node.target, schema, stack);
       if (expr_t.type === 'Record') {
         const type = expr_t.record[node.field.name];
         if (type !== undefined) {

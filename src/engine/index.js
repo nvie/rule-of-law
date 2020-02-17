@@ -67,8 +67,8 @@ function predToSQLParts(node: PredicateNode): SQLParts {
   }
 
   switch (node.kind) {
-    case 'FieldSelection': {
-      const expr1 = simpleNodeToSQL(node.expr);
+    case 'MemberAccess': {
+      const expr1 = simpleNodeToSQL(node.target);
       const expr2 = simpleNodeToSQL(node.field);
 
       invariant(

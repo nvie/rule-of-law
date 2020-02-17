@@ -53,10 +53,10 @@ export type ExistsNode = {|
   level: 1,
 |};
 
-export type FieldSelectionNode = {|
-  kind: 'FieldSelection',
+export type MemberAccessNode = {|
+  kind: 'MemberAccess',
   location?: Location,
-  expr: ExprNode,
+  target: MemberAccessNode | IdentifierNode,
   field: IdentifierNode,
   level: 8,
 |};
@@ -110,7 +110,7 @@ export type PredicateNode =
 
 export type ExprNode =
   | ComparisonNode
-  | FieldSelectionNode
+  | MemberAccessNode
   | LiteralNode
   | IdentifierNode;
 
@@ -172,7 +172,7 @@ export function isPredicateNode(node: Node): boolean %checks {
 export function isExprNode(node: Node): boolean %checks {
   return (
     node.kind === 'Comparison' ||
-    node.kind === 'FieldSelection' ||
+    node.kind === 'MemberAccess' ||
     node.kind === 'Identifier' ||
     isLiteralNode(node)
   );
@@ -331,14 +331,14 @@ const StringLiteral = (
   value,
 });
 
-const FieldSelection = (
-  expr: ExprNode,
+const MemberAccess = (
+  target: MemberAccessNode | IdentifierNode,
   field: IdentifierNode,
   location?: Location,
-): FieldSelectionNode => ({
-  kind: 'FieldSelection',
+): MemberAccessNode => ({
+  kind: 'MemberAccess',
   location,
-  expr,
+  target,
   field,
   level: 8,
 });
@@ -350,10 +350,10 @@ export default {
   Document,
   Equivalence,
   Exists,
-  FieldSelection,
   ForAll,
   Identifier,
   Implication,
+  MemberAccess,
   NOT,
   NullLiteral,
   NumberLiteral,
