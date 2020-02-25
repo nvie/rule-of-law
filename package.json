@@ -39,7 +39,7 @@
     "babel-jest": "^25.1.0",
     "flow-bin": "^0.118.0",
     "flow-copy-source": "^2.0.9",
-    "flow-typed": "^2.6.2",
+    "flow-typed": "^3.0.0",
     "in-publish": "^2.0.0",
     "jest-cli": "^25.1.0",
     "pegjs": "^0.10.0",
