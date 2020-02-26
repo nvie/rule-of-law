@@ -41,7 +41,6 @@ function wrap(s: string): string {
 }
 
 function wrapExpr(s: string, subExpr: ExprNode, currExpr: ExprNode): string {
-  console.error({ s, subExpr, currExpr });
   return subExpr.level !== undefined &&
     currExpr.level !== undefined &&
     subExpr.level < currExpr.level
