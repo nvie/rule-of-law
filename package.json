@@ -1,6 +1,6 @@
 {
   "name": "rule-of-law",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "dist/index.js",
   "author": "Vincent Driessen",
   "license": "MIT",
