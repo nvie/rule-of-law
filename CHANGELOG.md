@@ -1,3 +1,7 @@
+# 0.0.9
+
+* Remove console logs used for debugging (d'oh)
+
 # 0.0.8
 
 * Add syntax support for math operators, e.g.
