@@ -236,6 +236,78 @@ describe('comparison operators', () => {
   });
 });
 
+describe('math operators', () => {
+  it('+', () => {
+    expect(parsePredicate('x + y = 0')).toEqual(
+      ast.Comparison(
+        '=',
+        ast.BinaryOp('+', ast.Identifier('x'), ast.Identifier('y'), 8),
+        ast.NumberLiteral(0),
+      ),
+    );
+    expect(parsePredicate('p + q + r + s = 0')).toEqual(
+      parsePredicate('((p + q) + r) + s = 0'),
+    );
+  });
+
+  it('-', () => {
+    expect(parsePredicate('x - y = 0')).toEqual(
+      ast.Comparison(
+        '=',
+        ast.BinaryOp('-', ast.Identifier('x'), ast.Identifier('y'), 8),
+        ast.NumberLiteral(0),
+      ),
+    );
+    expect(parsePredicate('p - q - r - s = 0')).toEqual(
+      parsePredicate('((p - q) - r) - s = 0'),
+    );
+  });
+
+  it('mixed + and -', () => {
+    expect(parsePredicate('p + q - r + s = 0')).toEqual(
+      parsePredicate('((p + q) - r) + s = 0'),
+    );
+  });
+
+  it('*', () => {
+    expect(parsePredicate('x * y = 0')).toEqual(
+      ast.Comparison(
+        '=',
+        ast.BinaryOp('*', ast.Identifier('x'), ast.Identifier('y'), 9),
+        ast.NumberLiteral(0),
+      ),
+    );
+    expect(parsePredicate('p * q * r * s = 0')).toEqual(
+      parsePredicate('((p * q) * r) * s = 0'),
+    );
+  });
+
+  it('/', () => {
+    expect(parsePredicate('x / y = 0')).toEqual(
+      ast.Comparison(
+        '=',
+        ast.BinaryOp('/', ast.Identifier('x'), ast.Identifier('y'), 9),
+        ast.NumberLiteral(0),
+      ),
+    );
+    expect(parsePredicate('p / q / r / s = 0')).toEqual(
+      parsePredicate('((p / q) / r) / s = 0'),
+    );
+  });
+
+  it('mixed * and /', () => {
+    expect(parsePredicate('p * q / r * s = 0')).toEqual(
+      parsePredicate('(((p * q) / r) * s) = 0'),
+    );
+  });
+
+  it('mixed *, /, +, and -', () => {
+    expect(parsePredicate('p * q + r / s - t * v - w = 0')).toEqual(
+      parsePredicate('(((((p * q)) + (r / s)) - (t * v)) - w) = 0'),
+    );
+  });
+});
+
 describe('expressions', () => {
   it('null literal', () => {
     expect(parsePredicate('null')).toEqual(ast.NullLiteral());

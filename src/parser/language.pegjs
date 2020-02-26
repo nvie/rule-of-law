@@ -14,6 +14,25 @@
   function loc() {
       return options.noLocation ? undefined : location()
   }
+
+  function leftAssocMemberAccess(exprs, rhs) {
+    if (exprs.length === 0) {
+      return rhs;
+    } else {
+      const [expr, op] = exprs.pop()
+      const lhs = leftAssocMemberAccess(exprs, expr);
+      return ast.MemberAccess(lhs, rhs, loc());
+    }
+  }
+
+  function leftAssoc(ops, rhs, level) {
+      if (ops.length === 0) {
+          return rhs
+      } else {
+          const [lhs, op] = ops.pop()
+          return ast.BinaryOp(op, leftAssoc(ops, lhs, level), rhs, level)
+      }
+  }
 }
 
 
@@ -82,34 +101,41 @@ Pred6
 
 
 Pred7
-  = LPAREN predicate:Predicate RPAREN
+  = LPAREN predicate:Predicate RPAREN !Op
+    //                                ^^^
+    //                                HACK: This makes sure this isn't
+    //                                mistakenly consumed as a predicate if we
+    //                                intended to consume it as an expression
+    //                                instead
     { return predicate }
 
-  / left:Expr op:( EQ / NEQ / LTE / GTE / LT / GT ) right:Expr
+  / left:Expr op:ComparisonOp right:Expr
     { return ast.Comparison(op, left, right, loc()) }
 
   / Expr
 
 
 Expr
-  = leading:( Identifier DOT )+ field:Identifier
-    {
-       function leftAssoc(exprs, rhs) {
-         if (exprs.length === 0) {
-           return rhs;
-         } else {
-           const [expr, op] = exprs.pop()
-           const lhs = leftAssoc(exprs, expr);
-           return ast.MemberAccess(lhs, rhs, loc());
-         }
-       }
+  = rest:( Expr2 ( PLUS / MINUS ) )* last:Expr2
+    { return leftAssoc(rest, last, 8) }
 
-       return leftAssoc(leading, field);
-    }
+
+Expr2
+  = rest:( Expr3 ( MULT / DIV ) )* last:Expr3
+    { return leftAssoc(rest, last, 9) }
+
+
+Expr3
+  = LPAREN expr:Expr RPAREN
+    { return expr }
+
+  / leading:( Identifier DOT )+ field:Identifier
+    { return leftAssocMemberAccess(leading, field); }
 
   / Literal
 
   / Identifier
+
 
 
 Literal "literal value"
@@ -140,6 +166,19 @@ StringLiteral
         .substring(1, rawValue.length - 1))  // strip off quotes
       return ast.StringLiteral(value, loc())
     }
+
+
+Op
+  = ComparisonOp
+  / ArithmeticOp
+
+
+ComparisonOp
+  = EQ / NEQ / LTE / GTE / LT / GT
+
+
+ArithmeticOp
+  = PLUS / MINUS / MULT / DIV
 
 
 _ ""
@@ -208,3 +247,8 @@ LT      = _ '<' _   { return '<' }
 LTE     = _ '<=' _  { return '<=' }
 NEQ     = _ '!=' _  { return '!=' }
 RPAREN  = _ ')' _   { return ')' }
+
+PLUS    = _ '+' _   { return '+' }
+MINUS   = _ '-' _   { return '-' }
+MULT    = _ '*' _   { return '*' }
+DIV     = _ '/' _   { return '/' }

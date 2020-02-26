@@ -13,6 +13,8 @@ export type Location = {|
 
 export type Node = DocumentNode | RuleNode | PredicateNode;
 
+export type ArithmeticOperator = '+' | '-' | '*' | '/';
+
 export type ComparisonOperator = '=' | '!=' | '<' | '>' | '<=' | '>=';
 
 export type DocumentNode = {|
@@ -109,6 +111,7 @@ export type PredicateNode =
   | ExprNode;
 
 export type ExprNode =
+  | BinaryOpNode
   | ComparisonNode
   | MemberAccessNode
   | LiteralNode
@@ -154,6 +157,15 @@ export type ComparisonNode = {|
   left: ExprNode,
   right: ExprNode,
   level: 7,
+|};
+
+export type BinaryOpNode = {|
+  kind: 'BinaryOp',
+  location?: Location,
+  op: ArithmeticOperator,
+  left: ExprNode,
+  right: ExprNode,
+  level: 8 | 9,
 |};
 
 export function isPredicateNode(node: Node): boolean %checks {
@@ -288,6 +300,21 @@ const Document = (
   location,
 });
 
+const BinaryOp = (
+  op: ArithmeticOperator,
+  left: ExprNode,
+  right: ExprNode,
+  level: 8 | 9,
+  location?: Location,
+): BinaryOpNode => ({
+  kind: 'BinaryOp',
+  op,
+  left,
+  right,
+  level,
+  location,
+});
+
 const Comparison = (
   op: ComparisonOperator,
   left: ExprNode,
@@ -295,11 +322,11 @@ const Comparison = (
   location?: Location,
 ): ComparisonNode => ({
   kind: 'Comparison',
-  location,
   op,
   left,
   right,
   level: 7,
+  location,
 });
 
 const NullLiteral = (location?: Location): NullLiteralNode => ({
@@ -345,6 +372,7 @@ const MemberAccess = (
 
 export default {
   AND,
+  BinaryOp,
   BoolLiteral,
   Comparison,
   Document,
