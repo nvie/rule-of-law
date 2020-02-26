@@ -1,3 +1,8 @@
+# 0.0.8
+
+* Add syntax support for math operators, e.g.
+  `foo.x + foo.y < foo.z`
+
 # 0.0.7
 
 * Enable syntax to compare date fields against string literals, like
