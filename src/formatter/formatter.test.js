@@ -22,4 +22,8 @@ describe('formatter', () => {
       'very_long_names_will_make_this_be_split_onto_multiple_lines\nand\nalso_pretty_long',
     );
   });
+
+  it('math operators', () => {
+    expect(format(p('p*(q+r/s)'))).toEqual('p * (q + r / s)');
+  });
 });

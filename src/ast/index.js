@@ -60,7 +60,7 @@ export type MemberAccessNode = {|
   location?: Location,
   target: MemberAccessNode | IdentifierNode,
   field: IdentifierNode,
-  level: 8,
+  level: 10,
 |};
 
 export type ImplicationNode = {|
@@ -368,7 +368,7 @@ const MemberAccess = (
   location,
   target,
   field,
-  level: 8,
+  level: 10,
 });
 
 export default {

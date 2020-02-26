@@ -40,6 +40,15 @@ function wrap(s: string): string {
   return `(${s})`;
 }
 
+function wrapExpr(s: string, subExpr: ExprNode, currExpr: ExprNode): string {
+  console.error({ s, subExpr, currExpr });
+  return subExpr.level !== undefined &&
+    currExpr.level !== undefined &&
+    subExpr.level < currExpr.level
+    ? `(${s})`
+    : s;
+}
+
 function wrapS(s: SQLParts): SQLParts {
   return { ...s, condition: wrap(s.condition) };
 }
@@ -83,7 +92,8 @@ function predToSQLParts(node: PredicateNode): SQLParts {
       };
     }
 
-    case 'Comparison': {
+    case 'Comparison':
+    case 'BinaryOp': {
       let op = node.op;
 
       // Special-case handling for NULLs in SQL
@@ -105,7 +115,11 @@ function predToSQLParts(node: PredicateNode): SQLParts {
       return {
         fields: [...left.fields, ...right.fields],
         tables: [...left.tables, ...right.tables],
-        condition: `${left.condition} ${op} ${right.condition}`,
+        condition: `${wrapExpr(
+          left.condition,
+          node.left,
+          node,
+        )} ${op} ${wrapExpr(right.condition, node.right, node)}`,
       };
     }
 

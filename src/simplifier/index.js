@@ -180,6 +180,7 @@ export default function simplify(node: Node): Node {
     case 'ForAll':
     case 'Exists':
     case 'Comparison':
+    case 'BinaryOp':
     case 'Identifier':
       return simplifyPredicate(node);
 

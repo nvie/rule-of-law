@@ -90,7 +90,8 @@ export default function format(node: Node): string {
     }
 
     case 'Comparison':
-      return `${format(node.left)} ${node.op} ${format(node.right)}`;
+    case 'BinaryOp':
+      return `${wrap(node.left, node)} ${node.op} ${wrap(node.right, node)}`;
 
     case 'MemberAccess':
       return `${format(node.target)}.${format(node.field)}`;
