@@ -272,6 +272,31 @@ function check(node: Node, schema: Schema, stack: Stack): TypeInfo {
       return t.Bool();
     }
 
+    case 'BinaryOp': {
+      const left_t = check(node.left, schema, stack);
+      const right_t = check(node.right, schema, stack);
+
+      if (left_t.type !== 'Int') {
+        throw new TypeCheckError(
+          `Left argument to math operator must be Int expression (but found ${typeToString(
+            left_t,
+          )})`,
+          node.left.location,
+        );
+      }
+
+      if (right_t.type !== 'Int') {
+        throw new TypeCheckError(
+          `Right argument to math operator must be Int expression (but found ${typeToString(
+            right_t,
+          )})`,
+          node.right.location,
+        );
+      }
+
+      return t.Int();
+    }
+
     case 'Identifier': {
       // Check the variable exists
       const type = stack.getTypeOrNull(node.name);

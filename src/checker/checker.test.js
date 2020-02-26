@@ -68,6 +68,16 @@ describe('checker', () => {
     doesNotTypeCheck('NULL != "hey"');
   });
 
+  it('math expressions', () => {
+    typeChecks('1 + 2', t.Int());
+    typeChecks('1 - 2', t.Int());
+    typeChecks('1 * 2', t.Int());
+    typeChecks('1 / 2', t.Int());
+    typeChecks('1 / 2 + 3 * 4 - 5', t.Int());
+    doesNotTypeCheck('1 + "hey"');
+    doesNotTypeCheck('"foo" + "bar"');
+  });
+
   it('compare dates (with strings)', () => {
     typeChecks('forall Foo f: f.createdAt != f.createdAt', t.Bool());
     typeChecks('forall Foo f: f.createdAt >= "2020-01-01"', t.Bool());

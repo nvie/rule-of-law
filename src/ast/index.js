@@ -183,6 +183,7 @@ export function isPredicateNode(node: Node): boolean %checks {
 
 export function isExprNode(node: Node): boolean %checks {
   return (
+    node.kind === 'BinaryOp' ||
     node.kind === 'Comparison' ||
     node.kind === 'MemberAccess' ||
     node.kind === 'Identifier' ||
