@@ -15,6 +15,21 @@ type ParseOptions = {|
   noLocation?: boolean,
 |};
 
+type Location = {|
+  start: Position,
+  end: Position,
+|};
+
+type Position = {|
+  line: number,
+  column: number,
+|};
+
+function getLocation(e: Error): Location {
+  // $FlowFixMe - SyntaxError/TypeCheckError have an optional `location` field
+  return e.location;
+}
+
 export function printFriendlyError(
   e: Error,
   input: string,
@@ -28,9 +43,9 @@ export function printFriendlyError(
   );
   console.log('');
 
-  // $FlowFixMe - SyntaxError/TypeCheckError have an optional `location` field
-  if (e.location) {
-    const { start, end } = e.location;
+  const location = getLocation(e);
+  if (location) {
+    const { start, end } = location;
     for (
       let lineno = Math.max(1, start.line - 3 + 1);
       lineno <= Math.min(end.line + 3, lines.length - 1);
