@@ -41,7 +41,7 @@
     "flow-copy-source": "^2.0.9",
     "flow-typed": "^3.0.0",
     "in-publish": "^2.0.0",
-    "jest-cli": "^25.1.0",
+    "jest-cli": "^26.0.1",
     "pegjs": "^0.10.0",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.0"
