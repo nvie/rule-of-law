@@ -57,7 +57,7 @@ export function typeToString(type: TypeInfo): string {
   switch (type.type) {
     case 'Record': {
       return `{${Object.keys(type.record)
-        .map(key => `${key}: ${typeToString(type.record[key])}`)
+        .map((key) => `${key}: ${typeToString(type.record[key])}`)
         .join(', ')}}`;
     }
 
@@ -155,7 +155,7 @@ function isCompatible(type1: TypeInfo, type2: TypeInfo): boolean {
 function check(node: Node, schema: Schema, stack: Stack): TypeInfo {
   switch (node.kind) {
     case 'Document': {
-      node.rules.forEach(node => {
+      node.rules.forEach((node) => {
         check(node, schema, stack);
       });
       return t.Empty();
@@ -347,7 +347,7 @@ function check(node: Node, schema: Schema, stack: Stack): TypeInfo {
   }
 }
 
-export default function(
+export default function (
   node: Node,
   schema: Schema,
   inputString: string,

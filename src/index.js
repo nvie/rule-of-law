@@ -24,7 +24,7 @@ export default async function* iterAll(
   limit: number | null,
 ): AsyncGenerator<RuleInfo, void, void> {
   const schemaContentsPromise = readFile(schemaFile, 'utf-8');
-  const openFiles = files.map(f => [f, readFile(f, 'utf-8')]);
+  const openFiles = files.map((f) => [f, readFile(f, 'utf-8')]);
 
   const schema = parseSchema(await schemaContentsPromise);
   for (const [filename, openFilePromise] of openFiles) {
