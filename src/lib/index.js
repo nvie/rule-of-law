@@ -3,7 +3,7 @@
 export function indent(n: number, text: string): string {
   return text
     .split('\n')
-    .map(line => ' '.repeat(n) + line)
+    .map((line) => ' '.repeat(n) + line)
     .join('\n');
 }
 
@@ -20,12 +20,12 @@ export function indentIfMultiLine(
     : `${pre1}${text}${suf1}`;
 }
 
-export function sumBy<T>(arr: Array<T>, keyFn: T => number): number {
+export function sumBy<T>(arr: Array<T>, keyFn: (T) => number): number {
   return arr.reduce((total, cur) => total + keyFn(cur), 0);
 }
 
 export function lines(lines: Array<?string>): string {
-  return lines.filter(x => (x != null ? true : false)).join('\n');
+  return lines.filter((x) => (x != null ? true : false)).join('\n');
 }
 
 export function uniq(items: Array<string>): Array<string> {

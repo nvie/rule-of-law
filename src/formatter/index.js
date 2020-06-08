@@ -24,7 +24,7 @@ function wrap(subnode: Node, currnode: Node): string {
 export default function format(node: Node): string {
   switch (node.kind) {
     case 'Document':
-      return node.rules.map(rule => format(rule)).join('\n\n');
+      return node.rules.map((rule) => format(rule)).join('\n\n');
 
     case 'Rule':
       return lines([
@@ -45,10 +45,10 @@ export default function format(node: Node): string {
       ]);
 
     case 'AND': {
-      const legs = node.args.map(arg => `${wrap(arg, node)}`);
+      const legs = node.args.map((arg) => `${wrap(arg, node)}`);
       return legs.join(
         legs.some(
-          t => t.includes('\n') || sumBy(legs, t => t.length) > WRAP_WIDTH,
+          (t) => t.includes('\n') || sumBy(legs, (t) => t.length) > WRAP_WIDTH,
         )
           ? '\nand\n'
           : ' and ',
@@ -56,10 +56,10 @@ export default function format(node: Node): string {
     }
 
     case 'OR': {
-      const legs = node.args.map(arg => `${wrap(arg, node)}`);
+      const legs = node.args.map((arg) => `${wrap(arg, node)}`);
       return legs.join(
         legs.some(
-          t => t.includes('\n') || sumBy(legs, t => t.length) > WRAP_WIDTH,
+          (t) => t.includes('\n') || sumBy(legs, (t) => t.length) > WRAP_WIDTH,
         )
           ? '\nor\n'
           : ' or ',
@@ -72,7 +72,7 @@ export default function format(node: Node): string {
     case 'Implication': {
       const legs = [wrap(node.left, node), wrap(node.right, node)];
       const multi = legs.some(
-        t => t.includes('\n') || sumBy(legs, t => t.length) > WRAP_WIDTH,
+        (t) => t.includes('\n') || sumBy(legs, (t) => t.length) > WRAP_WIDTH,
       );
       return multi
         ? lines([`${legs[0]} =>`, indent(2, legs[1])])
@@ -82,7 +82,7 @@ export default function format(node: Node): string {
     case 'Equivalence': {
       const legs = [wrap(node.left, node), wrap(node.right, node)];
       const multi = legs.some(
-        t => t.includes('\n') || sumBy(legs, t => t.length) > WRAP_WIDTH,
+        (t) => t.includes('\n') || sumBy(legs, (t) => t.length) > WRAP_WIDTH,
       );
       return multi
         ? lines([`${legs[0]} <=>`, indent(2, legs[1])])

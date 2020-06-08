@@ -57,9 +57,11 @@ export function simplifyPredicate(node: PredicateNode): PredicateNode {
       } else if (child.kind === 'NOT') {
         return simplifyPredicate(child.predicate);
       } else if (child.kind === 'AND') {
-        return simplifyPredicate(ast.OR(child.args.map(arg => ast.NOT(arg))));
+        return simplifyPredicate(ast.OR(child.args.map((arg) => ast.NOT(arg))));
       } else if (child.kind === 'OR') {
-        return simplifyPredicate(ast.AND(child.args.map(arg => ast.NOT(arg))));
+        return simplifyPredicate(
+          ast.AND(child.args.map((arg) => ast.NOT(arg))),
+        );
       } else if (child.kind === 'ForAll') {
         return ast.Exists(
           child.set,
@@ -163,7 +165,7 @@ export function simplifyPredicate(node: PredicateNode): PredicateNode {
 }
 
 function simplifyDocument(node: DocumentNode): DocumentNode {
-  return ast.Document(node.rules.map(rule => simplifyRule(rule)));
+  return ast.Document(node.rules.map((rule) => simplifyRule(rule)));
 }
 
 function simplifyRule(node: RuleNode): RuleNode {

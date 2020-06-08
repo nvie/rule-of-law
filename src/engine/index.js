@@ -123,7 +123,7 @@ function predToSQLParts(node: PredicateNode): SQLParts {
     }
 
     case 'AND': {
-      const legs = node.args.map(arg => wrapS(predToSQLParts(arg)));
+      const legs = node.args.map((arg) => wrapS(predToSQLParts(arg)));
       return legs.reduce((result, leg) => ({
         fields: [...result.fields, ...leg.fields],
         tables: [...result.tables, ...leg.tables],
@@ -132,7 +132,7 @@ function predToSQLParts(node: PredicateNode): SQLParts {
     }
 
     case 'OR': {
-      const legs = node.args.map(arg => wrapS(predToSQLParts(arg)));
+      const legs = node.args.map((arg) => wrapS(predToSQLParts(arg)));
       return legs.reduce((result, leg) => ({
         fields: [...result.fields, ...leg.fields],
         tables: [...result.tables, ...leg.tables],
@@ -194,13 +194,15 @@ function sqlToString(sql: SQLParts, limit?: number): string {
     indent(
       2,
       uniq(sql.fields)
-        .map(f => `${f} AS \`${f}\``)
+        .map((f) => `${f} AS \`${f}\``)
         .join(',\n') || 'null',
     ),
     'FROM',
     indent(
       2,
-      uniq(sql.tables.map(alias => `${alias.name} ${alias.alias}`)).join(',\n'),
+      uniq(sql.tables.map((alias) => `${alias.name} ${alias.alias}`)).join(
+        ',\n',
+      ),
     ),
     'WHERE',
     indent(2, sql.condition),
@@ -243,5 +245,5 @@ export default function executeDocument(
   document: DocumentNode,
   limit: number | null,
 ): Array<RuleOutput> {
-  return document.rules.map(rule => executeRule(rule, limit));
+  return document.rules.map((rule) => executeRule(rule, limit));
 }
