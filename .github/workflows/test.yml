@@ -17,11 +17,30 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Build parser
+      run: yarn run build:parser
+      env:
+        CI: true
+
     - name: Run tests
-      run: |
-        yarn install
-        yarn run build:parser
-        yarn run test
-        yarn run build:dist
+      run: yarn run test
+      env:
+        CI: true
+
+    - name: Flow
+      run: yarn run flow
+      env:
+        CI: true
+
+    - name: Prettier
+      run: yarn run prettier --check 'src/*.js' 'src/**/*.js'
+      env:
+        CI: true
+
+    - name: Build dist
+      run: yarn run build:dist
       env:
         CI: true
