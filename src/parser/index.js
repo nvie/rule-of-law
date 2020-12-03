@@ -105,8 +105,10 @@ function parseString(input, options = {}): Node | void {
      * a visually pleasing manner in the console.
      */
     if (/SyntaxError/.test(e)) {
+      console.log(input);
       printFriendlyError(e, input, 'Parse error');
-      process.exit(1);
+      // process.exit(1);
+      throw 1;
     } else {
       throw e;
     }
