@@ -23,7 +23,18 @@ describe('formatter', () => {
     );
   });
 
+  it('precedence', () => {
+    expect(format(p('(x >= 0) or (y)'))).toEqual('x >= 0 or y');
+    expect(format(p('x >= (0 or y)'))).toEqual('x >= (0 or y)');
+  });
+
   it('math operators', () => {
     expect(format(p('p*(q+r/s)'))).toEqual('p * (q + r / s)');
+  });
+
+  it('function calls', () => {
+    expect(format(p('p (q and r) >= 0 or s()'))).toEqual(
+      'p(q and r) >= 0 or s()',
+    );
   });
 });
