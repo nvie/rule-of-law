@@ -10,37 +10,37 @@ jobs:
         node-version: [10.x, 12.x, 13.x, 14.x]
 
     steps:
-    - uses: actions/checkout@v1
+      - uses: actions/checkout@v1
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Install dependencies
-      run: yarn install
+      - name: Install dependencies
+        run: yarn install
 
-    - name: Build parser
-      run: yarn run build:parser
-      env:
-        CI: true
+      - name: Build parser
+        run: yarn run build:parser
+        env:
+          CI: true
 
-    - name: Run tests
-      run: yarn run test
-      env:
-        CI: true
+      - name: Run tests
+        run: yarn run test
+        env:
+          CI: true
 
-    - name: Flow
-      run: yarn run flow
-      env:
-        CI: true
+      - name: Flow
+        run: yarn run flow
+        env:
+          CI: true
 
-    - name: Prettier
-      run: yarn run prettier --check 'src/*.js' 'src/**/*.js'
-      env:
-        CI: true
+      - name: Prettier
+        run: yarn run prettier --check 'src/*.js' 'src/**/*.js'
+        env:
+          CI: true
 
-    - name: Build dist
-      run: yarn run build:dist
-      env:
-        CI: true
+      - name: Build dist
+        run: yarn run build:dist
+        env:
+          CI: true
