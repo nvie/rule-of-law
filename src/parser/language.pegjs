@@ -129,7 +129,11 @@ Expr3
   = LPAREN expr:Expr RPAREN
     { return expr }
 
-  / leading:( Identifier DOT )+ field:Identifier
+  / Expr4
+
+
+Expr4
+  = leading:( Identifier DOT )+ field:Identifier
     { return leftAssocMemberAccess(leading, field); }
 
   / Literal
