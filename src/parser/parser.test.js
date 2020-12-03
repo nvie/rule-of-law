@@ -369,10 +369,31 @@ describe('expressions', () => {
   });
 
   it('function call expressions', () => {
+    expect(parsePredicate('f()')).toEqual(
+      ast.FunctionCall(ast.Identifier('f'), []),
+    );
+
     expect(parsePredicate('f(x, y)')).toEqual(
       ast.FunctionCall(ast.Identifier('f'), [
         ast.Identifier('x'),
         ast.Identifier('y'),
+      ]),
+    );
+
+    // Trailing comma makes no difference
+    expect(parsePredicate('f(x, y,)')).toEqual(
+      ast.FunctionCall(ast.Identifier('f'), [
+        ast.Identifier('x'),
+        ast.Identifier('y'),
+      ]),
+    );
+
+    expect(parsePredicate('f(g(h()), p.q)')).toEqual(
+      ast.FunctionCall(ast.Identifier('f'), [
+        ast.FunctionCall(ast.Identifier('g'), [
+          ast.FunctionCall(ast.Identifier('h'), []),
+        ]),
+        ast.MemberAccess(ast.Identifier('p'), ast.Identifier('q')),
       ]),
     );
   });
