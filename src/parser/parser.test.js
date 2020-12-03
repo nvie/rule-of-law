@@ -159,6 +159,30 @@ describe('predicates', () => {
         ]),
       ),
     );
+
+    expect(parsePredicate('x => f() and y')).toEqual(
+      ast.Implication(
+        ast.Identifier('x'),
+        ast.AND([
+          ast.FunctionCall(ast.Identifier('f'), []),
+          ast.Identifier('y'),
+        ]),
+      ),
+    );
+
+    expect(parsePredicate('x => f() >= 0 and y')).toEqual(
+      ast.Implication(
+        ast.Identifier('x'),
+        ast.AND([
+          ast.Comparison(
+            '>=',
+            ast.FunctionCall(ast.Identifier('f'), []),
+            ast.NumberLiteral(0),
+          ),
+          ast.Identifier('y'),
+        ]),
+      ),
+    );
   });
 });
 
