@@ -41,15 +41,15 @@
     "flow-copy-source": "^2.0.9",
     "flow-typed": "^3.2.1",
     "in-publish": "^2.0.1",
-    "jest-cli": "^26.1.0",
+    "jest-cli": "^26.6.3",
     "pegjs": "^0.10.0",
-    "prettier": "^2.0.5",
+    "prettier": "^2.2.1",
     "rimraf": "^3.0.2"
   },
   "dependencies": {
     "@babel/runtime": "^7.12.5",
     "colors": "^1.4.0",
-    "commander": "^5.1.0",
+    "commander": "^6.2.0",
     "invariant": "^2.2.4"
   },
   "description": "[![Build Status](https://github.com/nvie/rule-of-law/workflows/test/badge.svg)](https://github.com/nvie/rule-of-law/actions)",
