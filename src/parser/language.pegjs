@@ -129,8 +129,8 @@ Expr3
   = LPAREN expr:Expr RPAREN
     { return expr }
 
-  / callee:Expr4 LPAREN args:ExprList RPAREN
-    { return ast.FunctionCall(callee, args) }
+  / callee:Expr4 LPAREN args:ExprList? RPAREN
+    { return ast.FunctionCall(callee, args || []); }
 
   / Expr4
 
