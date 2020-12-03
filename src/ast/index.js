@@ -55,6 +55,14 @@ export type ExistsNode = {|
   level: 1,
 |};
 
+export type FunctionCallNode = {|
+  kind: 'FunctionCall',
+  location?: Location,
+  callee: MemberAccessNode | IdentifierNode,
+  args: Array<ExprNode>,
+  level: 11,
+|};
+
 export type MemberAccessNode = {|
   kind: 'MemberAccess',
   location?: Location,
@@ -113,8 +121,9 @@ export type PredicateNode =
 export type ExprNode =
   | BinaryOpNode
   | ComparisonNode
-  | MemberAccessNode
+  | FunctionCallNode
   | LiteralNode
+  | MemberAccessNode
   | IdentifierNode;
 
 export type LiteralNode =
@@ -185,8 +194,9 @@ export function isExprNode(node: Node): boolean %checks {
   return (
     node.kind === 'BinaryOp' ||
     node.kind === 'Comparison' ||
-    node.kind === 'MemberAccess' ||
+    node.kind === 'FunctionCall' ||
     node.kind === 'Identifier' ||
+    node.kind === 'MemberAccess' ||
     isLiteralNode(node)
   );
 }
@@ -245,6 +255,18 @@ const ForAll = (
   variable,
   predicate,
   level: 1,
+});
+
+const FunctionCall = (
+  callee: MemberAccessNode | IdentifierNode,
+  args: Array<ExprNode>,
+  location?: Location,
+): FunctionCallNode => ({
+  kind: 'FunctionCall',
+  location,
+  callee,
+  args,
+  level: 11,
 });
 
 const Implication = (
@@ -380,6 +402,7 @@ export default {
   Equivalence,
   Exists,
   ForAll,
+  FunctionCall,
   Identifier,
   Implication,
   MemberAccess,
