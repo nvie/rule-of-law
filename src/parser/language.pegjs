@@ -129,6 +129,9 @@ Expr3
   = LPAREN expr:Expr RPAREN
     { return expr }
 
+  / callee:Expr4 LPAREN args:ExprList RPAREN
+    { return ast.FunctionCall(callee, args) }
+
   / Expr4
 
 
@@ -140,6 +143,13 @@ Expr4
 
   / Identifier
 
+
+ExprList
+  = first:Expr
+    rest:( COMMA exprs:Expr
+           { return exprs } )*
+    COMMA?
+    { return [first, ...rest] }
 
 
 Literal "literal value"
@@ -240,6 +250,7 @@ EOK "end of keyword"
 // Punctuation
 //
 COLON   = _ ':' _   { return ':' }
+COMMA   = _ ',' _   { return ',' }
 DOT     = _ '.' _   { return '.' }
 EQ      = _ '=' _   { return '=' }
 EQUIV   = _ '<=>' _ { return '<=>' }
