@@ -367,6 +367,15 @@ describe('expressions', () => {
       ),
     );
   });
+
+  it('function call expressions', () => {
+    expect(parsePredicate('f(x, y)')).toEqual(
+      ast.FunctionCall(ast.Identifier('f'), [
+        ast.Identifier('x'),
+        ast.Identifier('y'),
+      ]),
+    );
+  });
 });
 
 describe('simple rule', () => {
