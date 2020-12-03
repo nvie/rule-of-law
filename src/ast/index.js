@@ -58,7 +58,7 @@ export type ExistsNode = {|
 export type FunctionCallNode = {|
   kind: 'FunctionCall',
   location?: Location,
-  callee: MemberAccessNode | IdentifierNode,
+  callee: IdentifierNode,
   args: Array<ExprNode>,
   level: 11,
 |};
@@ -258,7 +258,7 @@ const ForAll = (
 });
 
 const FunctionCall = (
-  callee: MemberAccessNode | IdentifierNode,
+  callee: IdentifierNode,
   args: Array<ExprNode>,
   location?: Location,
 ): FunctionCallNode => ({
