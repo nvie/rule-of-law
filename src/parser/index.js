@@ -26,7 +26,7 @@ type Position = {|
 |};
 
 function getLocation(e: Error): Location {
-  // $FlowFixMe - SyntaxError/TypeCheckError have an optional `location` field
+  // $FlowFixMe[prop-missing] - SyntaxError/TypeCheckError have an optional `location` field
   return e.location;
 }
 
