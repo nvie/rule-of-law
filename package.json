@@ -49,7 +49,7 @@
   "dependencies": {
     "@babel/runtime": "^7.12.5",
     "colors": "^1.4.0",
-    "commander": "^6.2.0",
+    "commander": "^9.1.0",
     "invariant": "^2.2.4"
   },
   "description": "[![Build Status](https://github.com/nvie/rule-of-law/workflows/test/badge.svg)](https://github.com/nvie/rule-of-law/actions)",
